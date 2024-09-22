@@ -1,0 +1,16 @@
+# Ignore IntelliJ project files
+*.iml
+.idea/
+
+# Ignore build files
+target/
+
+# Ignore logs and temp files
+*.log
+*.tmp
+
+# Ignore Maven dependencies
+/logs/
+/node_modules/
+.DS_Store
+
