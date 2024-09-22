@@ -10,6 +10,7 @@ import com.poloit.grupo12.inscripciones.repository.IUsuarioRepository;
 import com.poloit.grupo12.inscripciones.service.interfaces.IUsuarioSevice;
 import com.poloit.grupo12.inscripciones.validaciones.ValidarEmail;
 import com.poloit.grupo12.inscripciones.validaciones.ValidarFecha;
+import com.poloit.grupo12.inscripciones.validaciones.ValidarIdFormat;
 import com.poloit.grupo12.inscripciones.validaciones.ValidarRol;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,8 +33,7 @@ public class UsuarioService implements IUsuarioSevice {
 
     @Override
     public Page<UsuarioDTO> findByRol(String rolTipo, Pageable pageable) {
-        ValidarRol.validarRol(rolTipo);
-        Rol rol = Rol.valueOf(rolTipo.toUpperCase());
+        Rol rol = ValidarRol.validarRol(rolTipo);
         Page<Usuario> usuarios = usuarioRepository.findByRol(rol, pageable);
         if(usuarios.isEmpty())
             throw new RecursoNoEncontradoException("No se encontraron usuarios con el rol: " + rol.name());
@@ -42,15 +42,11 @@ public class UsuarioService implements IUsuarioSevice {
 
     @Override
     public UsuarioDTO findById(String id) {
-        try {
-            ModelMapper mapper = new ModelMapper();
-            Long idUsuario = Long.parseLong(id);
-            Optional<Usuario> optUsuario = usuarioRepository.findById(idUsuario);
-            return optUsuario.map(this::convertToDto).orElseThrow(()
-                    -> new RecursoNoEncontradoException("No se encontro usuario con id: "+ id));
-        } catch (NumberFormatException e) {
-            throw new IdNoValidoException("Id no valido: " + id);
-        }
+        ModelMapper mapper = new ModelMapper();
+        Long idUsuario = ValidarIdFormat.validarIdFormat(id);
+        Optional<Usuario> optUsuario = usuarioRepository.findById(idUsuario);
+        return optUsuario.map(this::convertToDto).orElseThrow(()
+                -> new RecursoNoEncontradoException("No se encontro usuario con id: "+ id));
     }
 
     @Override
@@ -81,18 +77,13 @@ public class UsuarioService implements IUsuarioSevice {
 
     @Override
     public void delete(String id) {
-        try {
-            Long idUsuario = Long.parseLong(id);
-            Optional<Usuario> usuario = usuarioRepository.findById(idUsuario);
-            if (usuario.isPresent()) {
-                usuarioRepository.deleteById(idUsuario);
-            } else {
-                throw new RecursoNoEncontradoException("No se encontro usuario con id: :" + id);
-            }
-        } catch (NumberFormatException e) {
-            throw new IdNoValidoException("Id no valido: " + id);
+        Long idUsuario = ValidarIdFormat.validarIdFormat(id);
+        Optional<Usuario> usuario = usuarioRepository.findById(idUsuario);
+        if (usuario.isPresent()) {
+            usuarioRepository.deleteById(idUsuario);
+        } else {
+            throw new RecursoNoEncontradoException("No se encontro usuario con id: :" + id);
         }
-
     }
 
     public Usuario save(Usuario usuario) {
