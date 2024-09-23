@@ -86,11 +86,16 @@ public class UsuarioService implements IUsuarioSevice {
         }
     }
 
-    public Usuario save(Usuario usuario) {
-        return usuarioRepository.save(usuario);
-    }
+    @Override
     public Usuario findByEmail(String email) {
-        return usuarioRepository.findByEmail(email);
+        ValidarEmail.validarEmail(email);
+        Usuario usuario  = usuarioRepository.findByEmail(email);
+        if (usuario != null) {
+            return usuario;
+        } else {
+            throw new RecursoNoEncontradoException("El email " + email + " no se encuentra" +
+                    "registrado en el sistema");
+        }
     }
 
     private UsuarioDTO convertToDto(Usuario usuario) {

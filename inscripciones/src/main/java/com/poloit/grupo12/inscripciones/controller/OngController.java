@@ -18,37 +18,25 @@ public class OngController {
     @GetMapping("/listar")
     public ResponseEntity<?> findAll(Pageable pageable) {
         Page<OngDTO> lista = service.findAll(pageable);
-        if (lista.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Page.empty());
-        }
-            return ResponseEntity.ok(lista);
+        return ResponseEntity.ok(lista);
     }
 
     @GetMapping("obtener/{id}")
-    public ResponseEntity<?> findById(@PathVariable Long id) {
+    public ResponseEntity<?> findById(@PathVariable String id) {
         Optional<OngDTO> opt = Optional.ofNullable(service.findById(id));
-        if (opt.isPresent()) {
-            return ResponseEntity.ok(opt.get());
-        } else {
-            String mensajeError = "No se encontro la ONG con ID " + id;
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(mensajeError);
-        }
+        return ResponseEntity.ok(opt.get());
+
     }
 
     @PostMapping("/crear")
     public ResponseEntity<?> create(@RequestBody OngDTO ongDTO) {
-        try {
-            OngDTO nuevaOng = service.save(ongDTO);
-            return ResponseEntity.status(HttpStatus.CREATED).body(nuevaOng);
-        } catch (Exception e) {
-            String mensajeError = "Ocurrió un error al crear la ONG " + ongDTO.getNombre();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mensajeError);
-        }
+        OngDTO nuevaOng = service.save(ongDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(nuevaOng);
     }
 
     @PutMapping("/editar/{id}")
     public ResponseEntity<?> update(@RequestBody OngDTO ongDTO,
-                                    @PathVariable Long id) {
+                                    @PathVariable String id) {
         if (service.findById(id) != null) {
             OngDTO OngEditada = service.update(id, ongDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body(OngEditada);
@@ -58,7 +46,7 @@ public class OngController {
         }
     }
     @DeleteMapping("/borrar/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
+    public ResponseEntity<?> delete(@PathVariable String id) {
         if (service.findById(id) != null) {
             service.delete(id);
             String mensajeOk = "Se elimino la ONG con ID " + id;

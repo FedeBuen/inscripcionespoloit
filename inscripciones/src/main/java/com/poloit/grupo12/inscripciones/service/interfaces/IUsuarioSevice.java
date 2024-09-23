@@ -13,6 +13,7 @@ public interface IUsuarioSevice {
     public UsuarioDTO save(UsuarioDTO usuarioDTO);
     public UsuarioDTO update(Long id, UsuarioDTO usuarioDTO);
     public void delete(String id);
-    public Usuario save(Usuario usuario);
+    //public UsuarioDTO findByEmail(String email);
+
     public Usuario findByEmail(String email);
 }
