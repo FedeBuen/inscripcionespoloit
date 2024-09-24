@@ -37,25 +37,15 @@ public class OngController {
     @PutMapping("/editar/{id}")
     public ResponseEntity<?> update(@RequestBody OngDTO ongDTO,
                                     @PathVariable String id) {
-        if (service.findById(id) != null) {
-            OngDTO OngEditada = service.update(id, ongDTO);
-            return ResponseEntity.status(HttpStatus.CREATED).body(OngEditada);
-        } else {
-            String mensajeError = "No se encontro la ONG con ID " + id;
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(mensajeError);
-        }
+        service.findById(id);
+        OngDTO OngEditada = service.update(id, ongDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(OngEditada);
     }
     @DeleteMapping("/borrar/{id}")
     public ResponseEntity<?> delete(@PathVariable String id) {
-        if (service.findById(id) != null) {
-            service.delete(id);
-            String mensajeOk = "Se elimino la ONG con ID " + id;
-            return ResponseEntity.ok(mensajeOk);
-
-        } else {
-            String mensajeError = "No se encontro la ONG con ID " + id;
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(mensajeError);
-        }
+        service.findById(id);
+        service.delete(id);
+        String mensajeOk = "Se elimino la ONG con ID " + id;
+        return ResponseEntity.ok(mensajeOk);
     }
-
 }

@@ -21,11 +21,10 @@ public class OngService implements IOngService {
     public Page<OngDTO> findAll(Pageable pageable) {
         Page<Ong> ongs = repository.findAll(pageable);
         if (ongs.isEmpty()) {
-            throw new RecursoNoEncontradoException("No se encontraron ongs en la base de datos");
+            throw new RecursoNoEncontradoException("No se encontraron Ongs en la base de datos");
         }
         return ongs.map(this::converToDto);
     }
-
     @Override
     public OngDTO findById(String id) {
         ModelMapper mapper = new ModelMapper();
@@ -38,7 +37,6 @@ public class OngService implements IOngService {
             throw new RecursoNoEncontradoException("No se encontro Ong con id: " + id);
         }
     }
-
     @Override
     public OngDTO save(OngDTO ongDTO) {
         ModelMapper mapper = new ModelMapper();
@@ -47,21 +45,15 @@ public class OngService implements IOngService {
         Ong newOng = repository.save(ong);
         return mapper.map(newOng, OngDTO.class);
     }
-
     @Override
     public OngDTO update(String id, OngDTO ongDTO) {
         ModelMapper mapper = new ModelMapper();
-        try {
-            Long idOng = ValidarIdFormat.validarIdFormat(id);
-            Ong ong = mapper.map(ongDTO, Ong.class);
-            ong.setId(idOng);
-            Ong newOng = repository.save(ong);
-            return mapper.map(newOng, OngDTO.class);
-        } catch (Exception e) {
-            throw new UnsupportedOperationException("Ocurrio un error al actualizar los datos");
-        }
+        Long idOng = ValidarIdFormat.validarIdFormat(id);
+        Ong ong = mapper.map(ongDTO, Ong.class);
+        ong.setId(idOng);
+        Ong newOng = repository.save(ong);
+        return mapper.map(newOng, OngDTO.class);
     }
-
     @Override
     public void delete(String id) {
         Long idOng = ValidarIdFormat.validarIdFormat(id);
@@ -72,5 +64,4 @@ public class OngService implements IOngService {
         OngDTO ongDTO = mapper.map(ong, OngDTO.class);
         return ongDTO;
     }
-
 }

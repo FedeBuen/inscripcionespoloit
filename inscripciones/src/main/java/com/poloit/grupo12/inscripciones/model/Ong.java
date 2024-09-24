@@ -18,12 +18,13 @@ public class Ong {
     private Long id;
     private String nombre;
     private String descripcion;
-    // private *imagen* logo;
+    private String logo;
     private String email;
 
-    public Ong(String nombre, String descripcion, String email) {
+    public Ong(String nombre, String descripcion, String logo, String email) {
         this.nombre = nombre;
         this.descripcion = descripcion;
+        this.logo = logo;
         this.email = email;
     }
 }

@@ -16,4 +16,17 @@ public class FechaUtils {
             throw new FechaNoValidaException("La fecha debe tener el formato yyyy-MM-dd: " + fechaStr);
         }
     }
+
+    public static void validarFechaMenorInicio(String fechaIniStr, String fechaFinStr) {
+        try {
+            DateTimeFormatter formato = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            LocalDate fechaIni = LocalDate.parse(fechaIniStr, formato);
+            LocalDate fechaFin = LocalDate.parse(fechaFinStr, formato);
+            if (!fechaIni.isBefore(fechaFin)) {
+                throw new FechaNoValidaException("La fecha de inicio debe ser anterior a la fecha de fin.");
+            }
+        } catch (DateTimeParseException e) {
+            throw new FechaNoValidaException("La fecha debe tener el formato yyyy-MM-dd");
+        }
+    }
 }

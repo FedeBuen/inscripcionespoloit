@@ -12,6 +12,6 @@ public class OngDTO {
     private Long id;
     private String nombre;
     private String descripcion;
-    // private *imagen* logo;
+    private String logo;
     private String email;
 }
