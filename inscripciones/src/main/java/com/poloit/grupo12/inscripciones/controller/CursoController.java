@@ -2,6 +2,7 @@ package com.poloit.grupo12.inscripciones.controller;
 
 import com.poloit.grupo12.inscripciones.dto.CursoDTO;
 import com.poloit.grupo12.inscripciones.service.implementacion.CursoService;
+import com.poloit.grupo12.inscripciones.validaciones.ValidarIdFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,21 +22,13 @@ public class CursoController {
     @GetMapping("/listar")
     public ResponseEntity<?> findAll(Pageable pageable) {
         Page<CursoDTO> lista = service.findAll(pageable);
-        if (lista.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Page.empty());
-        }
         return ResponseEntity.ok(lista);
     }
 
     @GetMapping("/obtener/{id}")
-    public ResponseEntity<?> findById(@PathVariable Long id) {
-        Optional<CursoDTO> optDTO = Optional.ofNullable(service.findById(id));
-        if (optDTO.isPresent()) {
-            return ResponseEntity.ok(optDTO);
-        } else {
-            String mensajeError = "No se encontró el curso con ID " + id;
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(mensajeError);
-        }
+    public ResponseEntity<?> findById(@PathVariable String id) {
+        CursoDTO cursoDTO = service.findById(id);
+        return ResponseEntity.ok(cursoDTO);
     }
 
     @PostMapping("/crear")
@@ -55,25 +48,20 @@ public class CursoController {
 
     @PutMapping("/editar/{id}")
     public ResponseEntity<?> update(@RequestBody CursoDTO cursoDTO,
-                                    @PathVariable Long id) {
-        if (service.findById(id) != null) {
+                                    @PathVariable String idCurso) {
+        if (service.findById(idCurso) != null) {
+            Long id = ValidarIdFormat.validarIdFormat(idCurso);
             CursoDTO cursoEditado = service.update(id, cursoDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body(cursoEditado);
         } else {
-            String mensajeError = "No se encontró el curso con ID " + id;
+            String mensajeError = "No se encontró el curso con ID " + idCurso;
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(mensajeError);
         }
     }
 
     @DeleteMapping("/borrar/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
-        if (service.findById(id) != null) {
-            service.delete(id);
-            String mensajeOk = "Se eliminó el curso con el ID " + id;
-            return ResponseEntity.ok(mensajeOk);
-        } else {
-            String mensajeError = "No se encontró el curso con el ID " + id;
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(mensajeError);
-        }
+    public ResponseEntity<?> delete(@PathVariable String id) {
+        service.delete(id);
+        return ResponseEntity.ok("Se eliminó el curso con el ID " + id);
     }
 }

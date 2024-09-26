@@ -2,6 +2,7 @@ package com.poloit.grupo12.inscripciones.service.implementacion;
 
 import com.poloit.grupo12.inscripciones.dto.CursoDTO;
 import com.poloit.grupo12.inscripciones.enums.Rol;
+import com.poloit.grupo12.inscripciones.exception.RecursoNoEncontradoException;
 import com.poloit.grupo12.inscripciones.model.Curso;
 import com.poloit.grupo12.inscripciones.model.Ong;
 import com.poloit.grupo12.inscripciones.model.Usuario;
@@ -9,6 +10,7 @@ import com.poloit.grupo12.inscripciones.repository.ICursoRepository;
 import com.poloit.grupo12.inscripciones.repository.IOngRepository;
 import com.poloit.grupo12.inscripciones.repository.IUsuarioRepository;
 import com.poloit.grupo12.inscripciones.service.interfaces.ICursoService;
+import com.poloit.grupo12.inscripciones.validaciones.ValidarIdFormat;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -32,14 +34,19 @@ public class CursoService implements ICursoService {
     @Override
     public Page<CursoDTO> findAll(Pageable pageable) {
         Page<Curso> cursos = cursoRepository.findAll(pageable);
+        if (cursos.isEmpty()) {
+            throw new RecursoNoEncontradoException("No se encontraron cursos en la base de datos");
+        }
         return cursos.map(this::convertToDto);
     }
 
     @Override
-    public CursoDTO findById(Long id) {
+    public CursoDTO findById(String idCurso) {
+        Long id = ValidarIdFormat.validarIdFormat(idCurso);
         ModelMapper mapper = new ModelMapper();
         Optional<Curso> optCurso = cursoRepository.findById(id);
-        return optCurso.map(this::convertToDto).orElse(null);
+        return optCurso.map(this::convertToDto).orElseThrow(()
+                -> new RecursoNoEncontradoException("No se encontro curso con id: "+ id));
     }
 
     @Override
@@ -80,8 +87,14 @@ public class CursoService implements ICursoService {
     }
 
     @Override
-    public void delete(Long id) {
-        cursoRepository.deleteById(id);
+    public void delete(String idCurso) {
+        Long id = ValidarIdFormat.validarIdFormat(idCurso);
+        Optional<Curso> curso = cursoRepository.findById(id);
+        if (curso.isPresent()) {
+            cursoRepository.deleteById(id);
+        } else {
+            throw new RecursoNoEncontradoException("No se encontro Curso con id: :" + id);
+        }
     }
 
     private CursoDTO convertToDto(Curso curso) {

@@ -70,8 +70,7 @@ public class UsuarioController {
     @DeleteMapping("/borrar/{id}")
     public ResponseEntity<?> delete(@PathVariable String id) {
             service.delete(id);
-            String mensajeOk = "Se elimino el usuario con el ID " + id;
-            return ResponseEntity.ok(mensajeOk);
+            return ResponseEntity.ok("Se elimino el usuario con el ID " + id);
     }
 }
 
