@@ -49,7 +49,6 @@ public class UsuarioController {
     }
     @PostMapping("/crear")
     public ResponseEntity<?> create(@RequestBody UsuarioDTO usuarioDTO) {
-            usuarioDTO.setPassword(encryptService.encryptPassword(usuarioDTO.getPassword()));
             UsuarioDTO nuevoUsuario = service.save(usuarioDTO);
             //emailService.sendEmailUsuario(usuarioDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body(nuevoUsuario);
@@ -58,19 +57,27 @@ public class UsuarioController {
     @PutMapping("/editar/{id}")
     public ResponseEntity<?> update(@RequestBody UsuarioDTO usuarioDTO,
                                   @PathVariable String id) {
-        try {
-            Long idUsuario = Long.parseLong(id);
-            UsuarioDTO usuarioEditado = service.update(idUsuario, usuarioDTO);
-            return ResponseEntity.status(HttpStatus.CREATED).body(usuarioEditado);
-        } catch (NumberFormatException e) {
-            throw new UsuarioIdNoValidoException("ID de usuario no válido: " + id);
-        }
+        service.update(id, usuarioDTO);
+        return ResponseEntity.ok("Se actualizo los datos del usuario");
     }
 
     @DeleteMapping("/borrar/{id}")
     public ResponseEntity<?> delete(@PathVariable String id) {
             service.delete(id);
             return ResponseEntity.ok("Se elimino el usuario con el ID " + id);
+    }
+
+    @PutMapping("/editar/email/{id}")
+    public ResponseEntity<?> updateEmail(@PathVariable String id,
+                                        @RequestBody UsuarioDTO usuarioDTO) {
+        service.updateEmail(id, usuarioDTO);
+        return ResponseEntity.ok("Se actualizo el email del usuario a: " + usuarioDTO.getEmail());
+    }
+    @PutMapping("/editar/password/{id}")
+    public ResponseEntity<?> updatePassword(@PathVariable String id,
+                                         @RequestBody UsuarioDTO usuarioDTO) {
+        service.updatePassword(id, usuarioDTO);
+        return ResponseEntity.ok("Se actualizo la contraseña del usuario");
     }
 }
 

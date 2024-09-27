@@ -3,15 +3,13 @@ package com.poloit.grupo12.inscripciones.service.implementacion;
 import com.poloit.grupo12.inscripciones.dto.UsuarioDTO;
 import com.poloit.grupo12.inscripciones.enums.Rol;
 import com.poloit.grupo12.inscripciones.exception.EmailRepetidoException;
-import com.poloit.grupo12.inscripciones.exception.IdNoValidoException;
 import com.poloit.grupo12.inscripciones.exception.RecursoNoEncontradoException;
 import com.poloit.grupo12.inscripciones.model.Usuario;
 import com.poloit.grupo12.inscripciones.repository.IUsuarioRepository;
+import com.poloit.grupo12.inscripciones.service.interfaces.IEncryptService;
 import com.poloit.grupo12.inscripciones.service.interfaces.IUsuarioSevice;
-import com.poloit.grupo12.inscripciones.validaciones.ValidarEmail;
-import com.poloit.grupo12.inscripciones.validaciones.ValidarFecha;
-import com.poloit.grupo12.inscripciones.validaciones.ValidarIdFormat;
-import com.poloit.grupo12.inscripciones.validaciones.ValidarRol;
+import com.poloit.grupo12.inscripciones.utils.FechaUtils;
+import com.poloit.grupo12.inscripciones.validaciones.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -22,7 +20,8 @@ import java.util.Optional;
 public class UsuarioService implements IUsuarioSevice {
     @Autowired
     private IUsuarioRepository usuarioRepository;
-
+    @Autowired
+    private IEncryptService encryptService;
     @Override
     public Page<UsuarioDTO> findAll(Pageable pageable) {
         Page<Usuario> usuarios = usuarioRepository.findAll(pageable);
@@ -53,26 +52,40 @@ public class UsuarioService implements IUsuarioSevice {
     public UsuarioDTO save(UsuarioDTO usuarioDTO) {
         ModelMapper mapper = new ModelMapper();
         ValidarEmail.validarEmail(usuarioDTO.getEmail());
-        ValidarRol.validarRol(usuarioDTO.getRol());
-        ValidarFecha.validarFechaNacimiento(usuarioDTO.getFechaNacimiento());
-        Usuario usuario = mapper.map(usuarioDTO, Usuario.class);
-
-        Usuario usuarioExistente = usuarioRepository.findByEmail(usuarioDTO.getEmail());
-        if (usuarioExistente != null)
+        if (usuarioRepository.existsByEmail(usuarioDTO.getEmail()))
             throw new EmailRepetidoException("El email " + usuarioDTO.getEmail() +
                     " se encuentra registrado");
-
+        ValidarNombre.validarNombre(usuarioDTO.getNombre());
+        ValidarApellido.validarApellido(usuarioDTO.getApellido());
+        ValidarRol.validarRol(usuarioDTO.getRol());
+        ValidarFecha.validarFechaNacimiento(usuarioDTO.getFechaNacimiento());
+        ValidarPassword.validarPassword(usuarioDTO.getPassword());
+        usuarioDTO.setPassword(encryptService.encryptPassword(usuarioDTO.getPassword()));
+        Usuario usuario = mapper.map(usuarioDTO, Usuario.class);
         Usuario nuevoUsuario = usuarioRepository.save(usuario);
         return convertToDto(nuevoUsuario);
     }
 
     @Override
-    public UsuarioDTO update(Long id, UsuarioDTO usuarioDTO) {
+    public UsuarioDTO update(String id, UsuarioDTO usuarioDTO) {
         ModelMapper mapper = new ModelMapper();
-        Usuario usuario = mapper.map(usuarioDTO, Usuario.class);
-        usuario.setId(id);
-            Usuario nuevoUsuario = usuarioRepository.save(usuario);
+        Long idUsuario = ValidarIdFormat.validarIdFormat(id);
+        Optional<Usuario> optUsuario = usuarioRepository.findById(idUsuario);
+        if (optUsuario.isPresent()) {
+            ValidarNombre.validarNombre(usuarioDTO.getNombre());
+            ValidarApellido.validarApellido(usuarioDTO.getApellido());
+            ValidarRol.validarRol(usuarioDTO.getRol());
+            ValidarFecha.validarFechaNacimiento(usuarioDTO.getFechaNacimiento());
+            Usuario usuario = optUsuario.get();
+            Usuario usuarioActualizado = mapper.map(usuarioDTO, Usuario.class);
+            usuarioActualizado.setEmail(usuario.getEmail());
+            usuarioActualizado.setPassword(usuario.getPassword());
+            usuarioActualizado.setId(idUsuario);
+            Usuario nuevoUsuario = usuarioRepository.save(usuarioActualizado);
             return convertToDto(nuevoUsuario);
+        } else {
+            throw new RecursoNoEncontradoException("No se encontro usuario con id: :" + id);
+        }
     }
 
     @Override
@@ -89,12 +102,45 @@ public class UsuarioService implements IUsuarioSevice {
     @Override
     public Usuario findByEmail(String email) {
         ValidarEmail.validarEmail(email);
-        Usuario usuario  = usuarioRepository.findByEmail(email);
+        Usuario usuario = usuarioRepository.findByEmail(email);
         if (usuario != null) {
             return usuario;
         } else {
             throw new RecursoNoEncontradoException("El email " + email + " no se encuentra" +
                     "registrado en el sistema");
+        }
+    }
+
+    @Override
+    public UsuarioDTO updateEmail(String id, UsuarioDTO usuarioDTO) {
+        ValidarEmail.validarEmail(usuarioDTO.getEmail());
+        Long idUsuario = ValidarIdFormat.validarIdFormat(id);
+        Optional<Usuario> optUsuario = usuarioRepository.findById(idUsuario);
+        if (optUsuario.isPresent()) {
+            Usuario usuario = optUsuario.get();
+            if (usuarioRepository.existsByEmail(usuarioDTO.getEmail()))
+                throw new EmailRepetidoException("El email " + usuarioDTO.getEmail() +
+                        " se encuentra registrado");
+            usuario.setEmail(usuarioDTO.getEmail());
+            Usuario nuevoUsuario = usuarioRepository.save(usuario);
+            return convertToDto(nuevoUsuario);
+        } else {
+           throw new RecursoNoEncontradoException("No se encontro usuario con Id: " + id);
+        }
+    }
+
+    @Override
+    public UsuarioDTO updatePassword(String id, UsuarioDTO usuarioDTO) {
+        ValidarPassword.validarPassword(usuarioDTO.getPassword());
+        Long idUsuario = ValidarIdFormat.validarIdFormat(id);
+        Optional<Usuario> optUsuario = usuarioRepository.findById(idUsuario);
+        if (optUsuario.isPresent()) {
+            Usuario usuario = optUsuario.get();
+            usuario.setPassword(encryptService.encryptPassword(usuarioDTO.getPassword()));
+            Usuario nuevoUsuario = usuarioRepository.save(usuario);
+            return convertToDto(nuevoUsuario);
+        } else {
+            throw new RecursoNoEncontradoException("No se encontro usuario con Id: " + id);
         }
     }
 

@@ -12,4 +12,6 @@ import org.springframework.stereotype.Repository;
 public interface IUsuarioRepository extends JpaRepository<Usuario, Long> {
     Usuario findByEmail(String email);
     Page<Usuario> findByRol(Rol rol, Pageable pageable);
+
+    boolean existsByEmail(String email);
 }

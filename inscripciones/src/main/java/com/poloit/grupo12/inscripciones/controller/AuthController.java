@@ -1,5 +1,6 @@
 package com.poloit.grupo12.inscripciones.controller;
 
+import com.poloit.grupo12.inscripciones.exception.PasswordIncorrectoException;
 import com.poloit.grupo12.inscripciones.exception.RecursoNoEncontradoException;
 import com.poloit.grupo12.inscripciones.model.Usuario;
 import com.poloit.grupo12.inscripciones.service.implementacion.EncryptService;
@@ -27,9 +28,10 @@ public class AuthController {
                     ", Bienvenido al sistema";
             return ResponseEntity.status(HttpStatus.OK).body(ok);
         } else {
+
             String passError = usuario.getNombre() + " " + usuario.getApellido() +
                     ", Error en la clave ingresada";
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(passError);
+            throw new PasswordIncorrectoException(passError);
         }
     }
 }

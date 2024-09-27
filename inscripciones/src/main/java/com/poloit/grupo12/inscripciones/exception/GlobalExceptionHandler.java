@@ -64,4 +64,37 @@ public class GlobalExceptionHandler {
         ErrorResponse error = new ErrorResponse(ex.getMessage(), url);
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
+    @ExceptionHandler(PasswordNoValidoException.class)
+    public ResponseEntity<ErrorResponse> handlePasswordNoValidoException(
+            PasswordNoValidoException ex,
+            HttpServletRequest request) {
+        String url = request.getRequestURI();
+        ErrorResponse error = new ErrorResponse(ex.getMessage(), url);
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(NombreNoValidoException.class)
+    public ResponseEntity<ErrorResponse> handleNombreNoValidoException(
+            NombreNoValidoException ex,
+            HttpServletRequest request) {
+        String url = request.getRequestURI();
+        ErrorResponse error = new ErrorResponse(ex.getMessage(), url);
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+    @ExceptionHandler(ApellidoNoValidoException.class)
+    public ResponseEntity<ErrorResponse> handleApellidoNoValidoException(
+            ApellidoNoValidoException ex,
+            HttpServletRequest request) {
+        String url = request.getRequestURI();
+        ErrorResponse error = new ErrorResponse(ex.getMessage(), url);
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+    @ExceptionHandler(PasswordIncorrectoException.class)
+    public ResponseEntity<ErrorResponse> handlePasswordIncorrectoException(
+            PasswordIncorrectoException ex,
+            HttpServletRequest request) {
+        String url = request.getRequestURI();
+        ErrorResponse error = new ErrorResponse(ex.getMessage(), url);
+        return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
+    }
 }
