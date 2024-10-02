@@ -10,8 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
-
 @RestController
 @RequestMapping("/api/curso")
 public class CursoController {
@@ -50,8 +48,7 @@ public class CursoController {
     public ResponseEntity<?> update(@RequestBody CursoDTO cursoDTO,
                                     @PathVariable String idCurso) {
         if (service.findById(idCurso) != null) {
-            Long id = ValidarIdFormat.validarIdFormat(idCurso);
-            CursoDTO cursoEditado = service.update(id, cursoDTO);
+            CursoDTO cursoEditado = service.update(idCurso, cursoDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body(cursoEditado);
         } else {
             String mensajeError = "No se encontró el curso con ID " + idCurso;

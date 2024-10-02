@@ -9,7 +9,7 @@ import java.time.format.DateTimeParseException;
 public class ValidarFecha {
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    public static void validarFechaNacimiento(String fecha) {
+    public static void validarFecha(String fecha) {
         try {
             // Intentar analizar la fecha con el formato especificado
             LocalDate.parse(fecha, DATE_FORMATTER);

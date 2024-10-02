@@ -17,13 +17,13 @@ public class CursoDTO {
 
     private String url;
     private String lenguaje;
-    private int duracion;
-    private boolean semanal;
+    private String duracion; //int
+    private String semanal; //boolean
 
-    private Date fechaInicio;
-    private Date fechaFin;
-    private Long ongId;
+    private String fechaInicio; //Date
+    private String fechaFin; //Date
+    private String ongId; //Long
     private String ongNombre;
-    private Long mentorId;
+    private String mentorId; //Long
     private String nombreMentor;
 }

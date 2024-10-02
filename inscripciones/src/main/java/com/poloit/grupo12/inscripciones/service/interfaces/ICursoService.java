@@ -7,6 +7,6 @@ public interface ICursoService {
     public Page<CursoDTO> findAll(Pageable pageable);
     public CursoDTO findById(String id);
     public CursoDTO save(CursoDTO cursoDTO);
-    public CursoDTO update(Long id, CursoDTO cursoDTO);
+    public CursoDTO update(String id, CursoDTO cursoDTO);
     public void delete(String id);
 }

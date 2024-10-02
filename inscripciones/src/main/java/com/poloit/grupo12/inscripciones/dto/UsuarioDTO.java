@@ -20,4 +20,12 @@ public class UsuarioDTO {
     private String rol;
     private String password;
 
+    public UsuarioDTO(String nombre, String apellido, String email, String fechaNacimiento, String rol, String password) {
+        this.nombre = nombre;
+        this.apellido = apellido;
+        this.email = email;
+        this.fechaNacimiento = fechaNacimiento;
+        this.rol = rol;
+        this.password = password;
+    }
 }

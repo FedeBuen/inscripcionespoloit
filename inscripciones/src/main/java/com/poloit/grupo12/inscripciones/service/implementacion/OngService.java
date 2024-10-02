@@ -28,7 +28,7 @@ public class OngService implements IOngService {
     @Override
     public OngDTO findById(String id) {
         ModelMapper mapper = new ModelMapper();
-        Long idOng = ValidarIdFormat.validarIdFormat(id);
+        Long idOng = ValidarIdFormat.convertirIdALong(id);
         Optional<Ong> optOng = repository.findById(idOng);
         if (optOng.isPresent()) {
             Ong ong = optOng.get();
@@ -48,15 +48,23 @@ public class OngService implements IOngService {
     @Override
     public OngDTO update(String id, OngDTO ongDTO) {
         ModelMapper mapper = new ModelMapper();
-        Long idOng = ValidarIdFormat.validarIdFormat(id);
-        Ong ong = mapper.map(ongDTO, Ong.class);
-        ong.setId(idOng);
-        Ong newOng = repository.save(ong);
-        return mapper.map(newOng, OngDTO.class);
+        Long idOng = ValidarIdFormat.convertirIdALong(id);
+        Optional<Ong> optOng = repository.findById(idOng);
+        if (optOng.isPresent()) {
+            Ong ong = optOng.get();
+            Optional.ofNullable(ongDTO.getNombre()).ifPresent(ong::setNombre);
+            Optional.ofNullable(ongDTO.getDescripcion()).ifPresent(ong::setDescripcion);
+            Optional.ofNullable(ongDTO.getEmail()).ifPresent(ong::setEmail);
+            Optional.ofNullable(ongDTO.getLogo()).ifPresent(ong::setLogo);
+            Ong newOng = repository.save(ong);
+            return mapper.map(newOng, OngDTO.class);
+        } else {
+            throw new RecursoNoEncontradoException("No se encontro Ong con id: " + id);
+        }
     }
     @Override
     public void delete(String id) {
-        Long idOng = ValidarIdFormat.validarIdFormat(id);
+        Long idOng = ValidarIdFormat.convertirIdALong(id);
         repository.deleteById(idOng);
     }
     private OngDTO converToDto(Ong ong) {

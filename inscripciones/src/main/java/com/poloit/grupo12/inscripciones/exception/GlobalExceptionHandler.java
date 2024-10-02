@@ -97,4 +97,14 @@ public class GlobalExceptionHandler {
         ErrorResponse error = new ErrorResponse(ex.getMessage(), url);
         return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
     }
+
+    @ExceptionHandler(RolNoAutorizadoException.class)
+    public ResponseEntity<ErrorResponse> handleRolNoAutorizadoException(
+            RolNoAutorizadoException ex,
+            HttpServletRequest request) {
+        String url = request.getRequestURI();
+        ErrorResponse error = new ErrorResponse(ex.getMessage(), url);
+        return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
+    }
+
 }

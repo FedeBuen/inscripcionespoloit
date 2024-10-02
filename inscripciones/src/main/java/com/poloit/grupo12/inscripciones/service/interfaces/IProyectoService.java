@@ -6,8 +6,8 @@ import org.springframework.data.domain.Pageable;
 
 public interface IProyectoService {
     Page<ProyectoDTO> findAll(Pageable pageable);
-    ProyectoDTO findById(Long id);
+    ProyectoDTO findById(String id);
     ProyectoDTO save(ProyectoDTO proyectoDTO);
-    ProyectoDTO update(Long id, ProyectoDTO proyectoDTO);
-    void delete(Long id);
+    ProyectoDTO update(String id, ProyectoDTO proyectoDTO);
+    void delete(String id);
 }

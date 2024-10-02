@@ -14,4 +14,11 @@ public class OngDTO {
     private String descripcion;
     private String logo;
     private String email;
+
+    public OngDTO(String nombre, String descripcion, String logo, String email) {
+        this.nombre = nombre;
+        this.descripcion = descripcion;
+        this.logo = logo;
+        this.email = email;
+    }
 }

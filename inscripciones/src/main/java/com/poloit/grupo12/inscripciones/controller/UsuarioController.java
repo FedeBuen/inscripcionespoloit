@@ -1,23 +1,16 @@
 package com.poloit.grupo12.inscripciones.controller;
 
 import com.poloit.grupo12.inscripciones.dto.UsuarioDTO;
-import com.poloit.grupo12.inscripciones.enums.Rol;
-import com.poloit.grupo12.inscripciones.exception.EmailNoValidoException;
-import com.poloit.grupo12.inscripciones.exception.RolNoValidoException;
-import com.poloit.grupo12.inscripciones.exception.UsuarioIdNoValidoException;
 import com.poloit.grupo12.inscripciones.service.implementacion.EmailService;
 import com.poloit.grupo12.inscripciones.service.implementacion.EncryptService;
 import com.poloit.grupo12.inscripciones.service.implementacion.UsuarioService;
-import com.poloit.grupo12.inscripciones.validaciones.ValidarRol;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-import java.util.Optional;
 @RestController
 @RequestMapping("/api/usuario")
 public class UsuarioController {
@@ -57,8 +50,8 @@ public class UsuarioController {
     @PutMapping("/editar/{id}")
     public ResponseEntity<?> update(@RequestBody UsuarioDTO usuarioDTO,
                                   @PathVariable String id) {
-        service.update(id, usuarioDTO);
-        return ResponseEntity.ok("Se actualizo los datos del usuario");
+        UsuarioDTO usuario = service.update(id, usuarioDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(usuario);
     }
 
     @DeleteMapping("/borrar/{id}")

@@ -8,7 +8,6 @@ import com.poloit.grupo12.inscripciones.model.Usuario;
 import com.poloit.grupo12.inscripciones.repository.IUsuarioRepository;
 import com.poloit.grupo12.inscripciones.service.interfaces.IEncryptService;
 import com.poloit.grupo12.inscripciones.service.interfaces.IUsuarioSevice;
-import com.poloit.grupo12.inscripciones.utils.FechaUtils;
 import com.poloit.grupo12.inscripciones.validaciones.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +31,7 @@ public class UsuarioService implements IUsuarioSevice {
 
     @Override
     public Page<UsuarioDTO> findByRol(String rolTipo, Pageable pageable) {
-        Rol rol = ValidarRol.validarRol(rolTipo);
+        Rol rol = ValidarRol.validarRolExistente(rolTipo);
         Page<Usuario> usuarios = usuarioRepository.findByRol(rol, pageable);
         if(usuarios.isEmpty())
             throw new RecursoNoEncontradoException("No se encontraron usuarios con el rol: " + rol.name());
@@ -41,8 +40,7 @@ public class UsuarioService implements IUsuarioSevice {
 
     @Override
     public UsuarioDTO findById(String id) {
-        ModelMapper mapper = new ModelMapper();
-        Long idUsuario = ValidarIdFormat.validarIdFormat(id);
+        Long idUsuario = ValidarIdFormat.convertirIdALong(id);
         Optional<Usuario> optUsuario = usuarioRepository.findById(idUsuario);
         return optUsuario.map(this::convertToDto).orElseThrow(()
                 -> new RecursoNoEncontradoException("No se encontro usuario con id: "+ id));
@@ -57,8 +55,8 @@ public class UsuarioService implements IUsuarioSevice {
                     " se encuentra registrado");
         ValidarNombre.validarNombre(usuarioDTO.getNombre());
         ValidarApellido.validarApellido(usuarioDTO.getApellido());
-        ValidarRol.validarRol(usuarioDTO.getRol());
-        ValidarFecha.validarFechaNacimiento(usuarioDTO.getFechaNacimiento());
+        ValidarRol.validarRolExistente(usuarioDTO.getRol());
+        ValidarFecha.validarFecha(usuarioDTO.getFechaNacimiento());
         ValidarPassword.validarPassword(usuarioDTO.getPassword());
         usuarioDTO.setPassword(encryptService.encryptPassword(usuarioDTO.getPassword()));
         Usuario usuario = mapper.map(usuarioDTO, Usuario.class);
@@ -69,13 +67,13 @@ public class UsuarioService implements IUsuarioSevice {
     @Override
     public UsuarioDTO update(String id, UsuarioDTO usuarioDTO) {
         ModelMapper mapper = new ModelMapper();
-        Long idUsuario = ValidarIdFormat.validarIdFormat(id);
+        Long idUsuario = ValidarIdFormat.convertirIdALong(id);
         Optional<Usuario> optUsuario = usuarioRepository.findById(idUsuario);
         if (optUsuario.isPresent()) {
             ValidarNombre.validarNombre(usuarioDTO.getNombre());
             ValidarApellido.validarApellido(usuarioDTO.getApellido());
-            ValidarRol.validarRol(usuarioDTO.getRol());
-            ValidarFecha.validarFechaNacimiento(usuarioDTO.getFechaNacimiento());
+            ValidarRol.validarRolExistente(usuarioDTO.getRol());
+            ValidarFecha.validarFecha(usuarioDTO.getFechaNacimiento());
             Usuario usuario = optUsuario.get();
             Usuario usuarioActualizado = mapper.map(usuarioDTO, Usuario.class);
             usuarioActualizado.setEmail(usuario.getEmail());
@@ -90,7 +88,7 @@ public class UsuarioService implements IUsuarioSevice {
 
     @Override
     public void delete(String id) {
-        Long idUsuario = ValidarIdFormat.validarIdFormat(id);
+        Long idUsuario = ValidarIdFormat.convertirIdALong(id);
         Optional<Usuario> usuario = usuarioRepository.findById(idUsuario);
         if (usuario.isPresent()) {
             usuarioRepository.deleteById(idUsuario);
@@ -114,7 +112,7 @@ public class UsuarioService implements IUsuarioSevice {
     @Override
     public UsuarioDTO updateEmail(String id, UsuarioDTO usuarioDTO) {
         ValidarEmail.validarEmail(usuarioDTO.getEmail());
-        Long idUsuario = ValidarIdFormat.validarIdFormat(id);
+        Long idUsuario = ValidarIdFormat.convertirIdALong(id);
         Optional<Usuario> optUsuario = usuarioRepository.findById(idUsuario);
         if (optUsuario.isPresent()) {
             Usuario usuario = optUsuario.get();
@@ -132,7 +130,7 @@ public class UsuarioService implements IUsuarioSevice {
     @Override
     public UsuarioDTO updatePassword(String id, UsuarioDTO usuarioDTO) {
         ValidarPassword.validarPassword(usuarioDTO.getPassword());
-        Long idUsuario = ValidarIdFormat.validarIdFormat(id);
+        Long idUsuario = ValidarIdFormat.convertirIdALong(id);
         Optional<Usuario> optUsuario = usuarioRepository.findById(idUsuario);
         if (optUsuario.isPresent()) {
             Usuario usuario = optUsuario.get();

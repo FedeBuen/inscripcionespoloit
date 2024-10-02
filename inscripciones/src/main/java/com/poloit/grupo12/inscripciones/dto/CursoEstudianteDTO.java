@@ -11,11 +11,16 @@ import java.util.Date;
 @NoArgsConstructor
 public class CursoEstudianteDTO {
 
-    private Long cursoId;
-    private Long estudianteId;
+    private String cursoId;
+    private String estudianteId;
     private String tituloCurso;
     private String nombreEstudiante;
     private String estado;
     private Double calificacion;
     private Date fechaInscripcion;
+
+    public CursoEstudianteDTO(String cursoId, String estudianteId) {
+        this.cursoId = cursoId;
+        this.estudianteId = estudianteId;
+    }
 }

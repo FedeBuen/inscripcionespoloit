@@ -2,6 +2,9 @@ package com.poloit.grupo12.inscripciones.service.implementacion;
 
 import com.poloit.grupo12.inscripciones.dto.CursoEstudianteDTO;
 import com.poloit.grupo12.inscripciones.enums.Estado;
+import com.poloit.grupo12.inscripciones.enums.Rol;
+import com.poloit.grupo12.inscripciones.exception.RecursoNoEncontradoException;
+import com.poloit.grupo12.inscripciones.exception.RolNoAutorizadoException;
 import com.poloit.grupo12.inscripciones.model.CursoEstudiante;
 import com.poloit.grupo12.inscripciones.model.CursoEstudianteId;
 import com.poloit.grupo12.inscripciones.model.Curso;
@@ -10,13 +13,15 @@ import com.poloit.grupo12.inscripciones.repository.ICursoEstudianteRepository;
 import com.poloit.grupo12.inscripciones.repository.ICursoRepository;
 import com.poloit.grupo12.inscripciones.repository.IUsuarioRepository;
 import com.poloit.grupo12.inscripciones.service.interfaces.ICursoEstudianteService;
+import com.poloit.grupo12.inscripciones.validaciones.ValidarIdFormat;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
 import java.util.Date;
+import java.util.EnumSet;
+import java.util.Optional;
 
 @Service
 public class CursoEstudianteService implements ICursoEstudianteService {
@@ -28,11 +33,12 @@ public class CursoEstudianteService implements ICursoEstudianteService {
     @Autowired
     private ICursoEstudianteRepository cursoEstudianteRepository;
 
-
-
     @Override
     public Page<CursoEstudianteDTO> findAll(Pageable pageable) {
-        return null;
+        Page<CursoEstudiante> listaCursoEstudiante = cursoEstudianteRepository.findAll(pageable);
+        if(listaCursoEstudiante.isEmpty())
+            throw new RecursoNoEncontradoException("No se encotraron estudiantes inscriptos a ningun curso");
+        return listaCursoEstudiante.map(this::convertToDto);
     }
 
     @Override
@@ -42,22 +48,9 @@ public class CursoEstudianteService implements ICursoEstudianteService {
 
     @Override
     public CursoEstudianteDTO save(CursoEstudianteDTO cursoEstudianteDTO) {
-        ModelMapper mapper = new ModelMapper();
-        CursoEstudiante cursoEstudiante = mapper.map(cursoEstudianteDTO, CursoEstudiante.class);
-        Usuario estudiante = estudianteRepository.findById(cursoEstudianteDTO.getEstudianteId())
-                .orElse(null);
-        Curso curso = cursoRepository.findById(cursoEstudianteDTO.getCursoId())
-                .orElse(null);
-        if (estudiante != null && curso != null) {
-            cursoEstudiante.setCurso(curso);
-            cursoEstudiante.setEstudiante(estudiante);
-            cursoEstudiante.setCalificacion(0.0);
-            cursoEstudiante.setEstado(Estado.INSCRIPTO);
-            cursoEstudiante.setFechaInscripcion(new Date());
-            cursoEstudianteRepository.save(cursoEstudiante);
-            return convertToDto(cursoEstudiante);
-        }
-        return null;
+        CursoEstudiante cursoEstudiante = getCursoEstudiante(cursoEstudianteDTO);
+        cursoEstudianteRepository.save(cursoEstudiante);
+        return convertToDto(cursoEstudiante);
     }
 
     @Override
@@ -73,12 +66,31 @@ public class CursoEstudianteService implements ICursoEstudianteService {
     private CursoEstudianteDTO convertToDto(CursoEstudiante cursoEstudiante) {
         ModelMapper mapper = new ModelMapper();
         CursoEstudianteDTO cursoEstudianteDTO = mapper.map(cursoEstudiante, CursoEstudianteDTO.class);
-        cursoEstudianteDTO.setEstudianteId(cursoEstudiante.getEstudiante().getId());
-        cursoEstudianteDTO.setCursoId(cursoEstudiante.getCurso().getId());
+        cursoEstudianteDTO.setEstudianteId(cursoEstudiante.getEstudiante().getId().toString());
+        cursoEstudianteDTO.setCursoId(cursoEstudiante.getCurso().getId().toString());
         cursoEstudianteDTO.setTituloCurso(cursoEstudiante.getCurso().getTitulo());
         cursoEstudianteDTO.setNombreEstudiante(cursoEstudiante.getEstudiante()
                 .getNombre() + " " + cursoEstudiante.getEstudiante()
                 .getApellido());
         return cursoEstudianteDTO;
+    }
+
+    private CursoEstudiante getCursoEstudiante(CursoEstudianteDTO cursoEstudianteDTO) {
+        Long idCursoL = ValidarIdFormat.convertirIdALong(cursoEstudianteDTO.getCursoId());
+        Long idEstudianteL = ValidarIdFormat.convertirIdALong(cursoEstudianteDTO.getEstudianteId());
+        Optional<Usuario> optEstudiante = estudianteRepository.findById(idEstudianteL);
+        Optional<Curso> optCurso = cursoRepository.findById(idCursoL);
+        Curso curso = optCurso.orElseThrow(() ->
+                new RecursoNoEncontradoException("No se encontró el curso con Id: " +
+                        cursoEstudianteDTO.getCursoId()));
+        Usuario estudiante = optEstudiante.orElseThrow(() ->
+                new RecursoNoEncontradoException("No se encontro el usuario con Id: " +
+                        cursoEstudianteDTO.getEstudianteId()));
+        EnumSet<Rol> rolesPermitidos = EnumSet.of(Rol.ESTUDIANTE, Rol.VISITANTE);
+        if (!rolesPermitidos.contains(estudiante.getRol())) {
+            throw new RolNoAutorizadoException("Para inscribirse a un curso el usuario debe ser VISITANTE o ESTUDIANTE");
+        }
+        CursoEstudianteId id = new CursoEstudianteId(idCursoL, idEstudianteL);
+        return new CursoEstudiante(id, estudiante, curso, Estado.INSCRIPTO, 0.0, new Date());
     }
 }

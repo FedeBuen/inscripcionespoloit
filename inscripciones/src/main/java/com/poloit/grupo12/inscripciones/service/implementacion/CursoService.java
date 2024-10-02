@@ -11,6 +11,7 @@ import com.poloit.grupo12.inscripciones.repository.IOngRepository;
 import com.poloit.grupo12.inscripciones.repository.IUsuarioRepository;
 import com.poloit.grupo12.inscripciones.service.interfaces.ICursoService;
 import com.poloit.grupo12.inscripciones.validaciones.ValidarIdFormat;
+import com.poloit.grupo12.inscripciones.validaciones.ValidarRol;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -34,15 +35,14 @@ public class CursoService implements ICursoService {
     @Override
     public Page<CursoDTO> findAll(Pageable pageable) {
         Page<Curso> cursos = cursoRepository.findAll(pageable);
-        if (cursos.isEmpty()) {
+        if (cursos.isEmpty())
             throw new RecursoNoEncontradoException("No se encontraron cursos en la base de datos");
-        }
         return cursos.map(this::convertToDto);
     }
 
     @Override
     public CursoDTO findById(String idCurso) {
-        Long id = ValidarIdFormat.validarIdFormat(idCurso);
+        Long id = ValidarIdFormat.convertirIdALong(idCurso);
         ModelMapper mapper = new ModelMapper();
         Optional<Curso> optCurso = cursoRepository.findById(id);
         return optCurso.map(this::convertToDto).orElseThrow(()
@@ -53,42 +53,45 @@ public class CursoService implements ICursoService {
     public CursoDTO save(CursoDTO cursoDTO) {
         ModelMapper mapper = new ModelMapper();
         Curso curso = mapper.map(cursoDTO, Curso.class);
-
-        Ong ong = ongRepository.findById(cursoDTO.getOngId()).orElse(null);
-        Usuario mentor = usuarioRepository.findById(cursoDTO.getMentorId()).orElse(null);
-
-        if (ong != null && mentor.getRol().equals(Rol.MENTOR)) {
-            curso.setOng(ong);
-            curso.setMentor(mentor);
-            Curso nuevoCurso = cursoRepository.save(curso);
-            return convertToDto(nuevoCurso);
-        }
-
-        return null; // Retorna null si hay algún problema
+        Long idOng = ValidarIdFormat.convertirIdALong(cursoDTO.getOngId());
+        Long idMentor = ValidarIdFormat.convertirIdALong(cursoDTO.getMentorId());
+        Ong ong = ongRepository.findById(idOng).orElseThrow(() ->
+                new RecursoNoEncontradoException("No se encontro ONG con el Id: " +
+                        cursoDTO.getOngId()));
+        Usuario mentor = usuarioRepository.findById(idMentor).orElseThrow(() ->
+                new RecursoNoEncontradoException("No se encontro Usuario con el Id: " +
+                        cursoDTO.getMentorId()));
+        ValidarRol.validarRolAutorizado(mentor.getRol().toString(), Rol.MENTOR);
+        curso.setOng(ong);
+        curso.setMentor(mentor);
+        Curso nuevoCurso = cursoRepository.save(curso);
+        return convertToDto(nuevoCurso);
     }
 
     @Override
-    public CursoDTO update(Long id, CursoDTO cursoDTO) {
+    public CursoDTO update(String id, CursoDTO cursoDTO) {
         ModelMapper mapper = new ModelMapper();
         Curso curso = mapper.map(cursoDTO, Curso.class);
-        curso.setId(id);
-
-        Ong ong = ongRepository.findById(cursoDTO.getOngId()).orElse(null);
-        Usuario mentor = usuarioRepository.findById(cursoDTO.getMentorId()).orElse(null);
-
-        if (ong != null && mentor.getRol().equals(Rol.MENTOR)) {
-            curso.setOng(ong);
-            curso.setMentor(mentor);
-            Curso nuevoCurso = cursoRepository.save(curso);
-            return convertToDto(nuevoCurso);
-        }
-
-        return null; // Retorna null si hay algún problema
+        Long idCurso = ValidarIdFormat.convertirIdALong(id);
+        curso.setId(idCurso);
+        Long idOng = ValidarIdFormat.convertirIdALong(cursoDTO.getOngId());
+        Long idMentor = ValidarIdFormat.convertirIdALong(cursoDTO.getMentorId());
+        Ong ong = ongRepository.findById(idOng).orElseThrow(() ->
+                new RecursoNoEncontradoException("No se encontro ONG con el Id: " +
+                        cursoDTO.getOngId()));
+        Usuario mentor = usuarioRepository.findById(idMentor).orElseThrow(() ->
+                new RecursoNoEncontradoException("No se encontro Usuario con el Id: " +
+                        cursoDTO.getMentorId()));
+        ValidarRol.validarRolAutorizado(mentor.getRol().toString(), Rol.MENTOR);
+        curso.setOng(ong);
+        curso.setMentor(mentor);
+        Curso nuevoCurso = cursoRepository.save(curso);
+        return convertToDto(nuevoCurso);
     }
 
     @Override
     public void delete(String idCurso) {
-        Long id = ValidarIdFormat.validarIdFormat(idCurso);
+        Long id = ValidarIdFormat.convertirIdALong(idCurso);
         Optional<Curso> curso = cursoRepository.findById(id);
         if (curso.isPresent()) {
             cursoRepository.deleteById(id);
@@ -100,9 +103,9 @@ public class CursoService implements ICursoService {
     private CursoDTO convertToDto(Curso curso) {
         ModelMapper mapper = new ModelMapper();
         CursoDTO cursoDTO = mapper.map(curso, CursoDTO.class);
-        cursoDTO.setOngId(curso.getOng().getId());
+        cursoDTO.setOngId(curso.getOng().getId().toString());
         cursoDTO.setOngNombre(curso.getOng().getNombre());
-        cursoDTO.setMentorId(curso.getMentor().getId());
+        cursoDTO.setMentorId(curso.getMentor().getId().toString());
         cursoDTO.setNombreMentor(curso.getMentor().getNombre() +
                 " " + curso.getMentor().getApellido());
         return cursoDTO;
