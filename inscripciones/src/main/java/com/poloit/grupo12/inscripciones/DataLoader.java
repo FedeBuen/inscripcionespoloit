@@ -112,7 +112,7 @@ public class DataLoader implements CommandLineRunner {
             cursoDTO.setUrl("https://www.codingdojo.la/wp-content/uploads/2022/07/react.jpg");
             cursoDTO.setLenguaje("Python");
             cursoDTO.setDuracion("8");
-            cursoDTO.setSemanal("true");
+            cursoDTO.setSemanal("1");
             cursoDTO.setFechaInicio("2024-10-08");
             cursoDTO.setFechaFin("2024-12-08");
             cursoDTO.setCategoria("Python");

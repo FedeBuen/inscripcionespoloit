@@ -27,7 +27,7 @@ public class Curso {
     private String url;
     private String lenguaje;
     private int duracion;
-    private boolean semanal;
+    private int semanal;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @Temporal(TemporalType.DATE)

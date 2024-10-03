@@ -33,12 +33,9 @@ public class CursoController {
     public ResponseEntity<?> create(@RequestBody CursoDTO cursoDTO) {
         try {
             CursoDTO nuevoCurso = service.save(cursoDTO);
-            if (nuevoCurso == null) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: ONG o Mentor no encontrados");
-            }
             return ResponseEntity.status(HttpStatus.CREATED).body(nuevoCurso);
         } catch (Exception e) {
-            e.printStackTrace(); // Imprimir la excepción para depuración
+            e.printStackTrace();
             String mensajeError = "Ocurrió un error al crear el curso: " + e.getMessage();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mensajeError);
         }
@@ -47,13 +44,9 @@ public class CursoController {
     @PutMapping("/editar/{id}")
     public ResponseEntity<?> update(@RequestBody CursoDTO cursoDTO,
                                     @PathVariable String idCurso) {
-        if (service.findById(idCurso) != null) {
-            CursoDTO cursoEditado = service.update(idCurso, cursoDTO);
-            return ResponseEntity.status(HttpStatus.CREATED).body(cursoEditado);
-        } else {
-            String mensajeError = "No se encontró el curso con ID " + idCurso;
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(mensajeError);
-        }
+        CursoDTO cursoEditado = service.update(idCurso, cursoDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(cursoEditado);
+
     }
 
     @DeleteMapping("/borrar/{id}")
