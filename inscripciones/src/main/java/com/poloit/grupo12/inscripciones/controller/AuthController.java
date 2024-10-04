@@ -20,7 +20,7 @@ public class AuthController {
     @Autowired
     private EncryptService encryptService;
 
-    @GetMapping("/login")
+    @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody UsuarioDTO usuarioDTO)  {
         Usuario usuario = usuarioService.findByEmail(usuarioDTO.getEmail());
         if (encryptService.verifyPassword(usuarioDTO.getPassword(), usuario.getPassword())) {
