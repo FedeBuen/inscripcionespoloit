@@ -26,7 +26,8 @@ public class AuthController {
         if (encryptService.verifyPassword(usuarioDTO.getPassword(), usuario.getPassword())) {
             String ok = usuario.getNombre() + " " + usuario.getApellido() +
                     ", Bienvenido al sistema";
-            return ResponseEntity.status(HttpStatus.OK).body(ok);
+            UsuarioDTO usuarioDTOLogueado = usuarioService.findById(usuario.getId().toString());
+            return ResponseEntity.status(HttpStatus.OK).body(usuarioDTOLogueado);
         } else {
 
             String passError = usuario.getNombre() + " " + usuario.getApellido() +

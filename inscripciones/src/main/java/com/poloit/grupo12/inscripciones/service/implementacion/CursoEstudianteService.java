@@ -1,6 +1,7 @@
 package com.poloit.grupo12.inscripciones.service.implementacion;
 
 import com.poloit.grupo12.inscripciones.dto.CursoEstudianteDTO;
+import com.poloit.grupo12.inscripciones.dto.CursoEstudianteIdDTO;
 import com.poloit.grupo12.inscripciones.enums.Estado;
 import com.poloit.grupo12.inscripciones.enums.Rol;
 import com.poloit.grupo12.inscripciones.exception.RecursoNoEncontradoException;
@@ -13,6 +14,7 @@ import com.poloit.grupo12.inscripciones.repository.ICursoEstudianteRepository;
 import com.poloit.grupo12.inscripciones.repository.ICursoRepository;
 import com.poloit.grupo12.inscripciones.repository.IUsuarioRepository;
 import com.poloit.grupo12.inscripciones.service.interfaces.ICursoEstudianteService;
+import com.poloit.grupo12.inscripciones.validaciones.ValidarEstado;
 import com.poloit.grupo12.inscripciones.validaciones.ValidarIdFormat;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,8 +44,9 @@ public class CursoEstudianteService implements ICursoEstudianteService {
     }
 
     @Override
-    public CursoEstudianteDTO findById(CursoEstudianteId id) {
-        return null;
+    public CursoEstudianteDTO findById(CursoEstudianteIdDTO id) {
+        CursoEstudiante cursoEstudiante = getCursoEstudiante(id);
+        return convertToDto(cursoEstudiante);
     }
 
     @Override
@@ -54,20 +57,27 @@ public class CursoEstudianteService implements ICursoEstudianteService {
     }
 
     @Override
-    public CursoEstudianteDTO update(CursoEstudianteId id, CursoEstudianteDTO cursoEstudianteDTO) {
-        return null;
+    public CursoEstudianteDTO update(CursoEstudianteDTO cursoEstudianteDTO) {
+        CursoEstudianteIdDTO id = new CursoEstudianteIdDTO(cursoEstudianteDTO.getIdCurso(), cursoEstudianteDTO.getIdEstudiante());
+        CursoEstudiante cursoEstudiante = getCursoEstudiante(id);
+        Estado estado = ValidarEstado.validarEstadoExistente(String.valueOf(cursoEstudiante.getEstado()));
+
+        CursoEstudiante cursoEstudianteActualizado = getCursoEstudiante(cursoEstudianteDTO);
+        cursoEstudianteRepository.save(cursoEstudianteActualizado);
+        return convertToDto(cursoEstudianteActualizado);
     }
 
     @Override
-    public void delete(CursoEstudianteId id) {
-
+    public void delete(CursoEstudianteIdDTO id) {
+        CursoEstudiante cursoEstudiante = getCursoEstudiante(id);
+        cursoEstudianteRepository.delete(cursoEstudiante);
     }
 
     private CursoEstudianteDTO convertToDto(CursoEstudiante cursoEstudiante) {
         ModelMapper mapper = new ModelMapper();
         CursoEstudianteDTO cursoEstudianteDTO = mapper.map(cursoEstudiante, CursoEstudianteDTO.class);
-        cursoEstudianteDTO.setEstudianteId(cursoEstudiante.getEstudiante().getId().toString());
-        cursoEstudianteDTO.setCursoId(cursoEstudiante.getCurso().getId().toString());
+        cursoEstudianteDTO.setIdEstudiante(cursoEstudiante.getEstudiante().getId().toString());
+        cursoEstudianteDTO.setIdCurso(cursoEstudiante.getCurso().getId().toString());
         cursoEstudianteDTO.setTituloCurso(cursoEstudiante.getCurso().getTitulo());
         cursoEstudianteDTO.setNombreEstudiante(cursoEstudiante.getEstudiante()
                 .getNombre() + " " + cursoEstudiante.getEstudiante()
@@ -76,21 +86,32 @@ public class CursoEstudianteService implements ICursoEstudianteService {
     }
 
     private CursoEstudiante getCursoEstudiante(CursoEstudianteDTO cursoEstudianteDTO) {
-        Long idCursoL = ValidarIdFormat.convertirIdALong(cursoEstudianteDTO.getCursoId());
-        Long idEstudianteL = ValidarIdFormat.convertirIdALong(cursoEstudianteDTO.getEstudianteId());
+        Long idCursoL = ValidarIdFormat.convertirIdALong(cursoEstudianteDTO.getIdCurso());
+        Long idEstudianteL = ValidarIdFormat.convertirIdALong(cursoEstudianteDTO.getIdEstudiante());
         Optional<Usuario> optEstudiante = estudianteRepository.findById(idEstudianteL);
         Optional<Curso> optCurso = cursoRepository.findById(idCursoL);
         Curso curso = optCurso.orElseThrow(() ->
                 new RecursoNoEncontradoException("No se encontró el curso con Id: " +
-                        cursoEstudianteDTO.getCursoId()));
+                        cursoEstudianteDTO.getIdCurso()));
         Usuario estudiante = optEstudiante.orElseThrow(() ->
                 new RecursoNoEncontradoException("No se encontro el usuario con Id: " +
-                        cursoEstudianteDTO.getEstudianteId()));
+                        cursoEstudianteDTO.getIdEstudiante()));
         EnumSet<Rol> rolesPermitidos = EnumSet.of(Rol.ESTUDIANTE, Rol.VISITANTE);
         if (!rolesPermitidos.contains(estudiante.getRol())) {
             throw new RolNoAutorizadoException("Para inscribirse a un curso el usuario debe ser VISITANTE o ESTUDIANTE");
         }
         CursoEstudianteId id = new CursoEstudianteId(idCursoL, idEstudianteL);
         return new CursoEstudiante(id, estudiante, curso, Estado.INSCRIPTO, 0.0, new Date());
+    }
+
+    private CursoEstudiante getCursoEstudiante(CursoEstudianteIdDTO id) {
+        Long idCurso = ValidarIdFormat.convertirIdALong(id.getIdCurso());
+        Long idEstudiante = ValidarIdFormat.convertirIdALong(id.getIdEstudiante());
+        CursoEstudianteId idCursoEstudiante = new CursoEstudianteId(idCurso, idEstudiante);
+        CursoEstudiante cursoEstudiante = cursoEstudianteRepository.findById(idCursoEstudiante)
+                .orElseThrow(() -> new RecursoNoEncontradoException(
+                        "No se encontró el CursoEstudiante con idCurso: "
+                                + idCurso + " y idEstudiante: " + idEstudiante));
+        return cursoEstudiante;
     }
 }
