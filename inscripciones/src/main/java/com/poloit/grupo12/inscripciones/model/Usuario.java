@@ -23,7 +23,6 @@ public class Usuario {
     private String email;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    @Temporal(TemporalType.DATE)
     private LocalDate fechaNacimiento;
 
     @Enumerated(EnumType.STRING)

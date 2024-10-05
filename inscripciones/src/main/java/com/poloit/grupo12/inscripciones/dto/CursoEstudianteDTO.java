@@ -23,4 +23,12 @@ public class CursoEstudianteDTO {
         this.idCurso = idCurso;
         this.idEstudiante = idEstudiante;
     }
+
+    public CursoEstudianteDTO(String idCurso, String idEstudiante, String estado, double calificacion, String fechaInscripcion) {
+        this.idCurso = idCurso;
+        this.idEstudiante = idEstudiante;
+        this.estado = estado;
+        this.calificacion = calificacion;
+        this.fechaInscripcion = fechaInscripcion;
+    }
 }

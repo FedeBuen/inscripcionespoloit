@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
 import java.util.Optional;
 @Service
 public class UsuarioService implements IUsuarioSevice {
@@ -57,9 +59,11 @@ public class UsuarioService implements IUsuarioSevice {
         ValidarApellido.validarApellido(usuarioDTO.getApellido());
         ValidarRol.validarRolExistente(usuarioDTO.getRol());
         ValidarFecha.validarFecha(usuarioDTO.getFechaNacimiento());
+        LocalDate fechaNacimiento = LocalDate.parse(usuarioDTO.getFechaNacimiento());
         ValidarPassword.validarPassword(usuarioDTO.getPassword());
         usuarioDTO.setPassword(encryptService.encryptPassword(usuarioDTO.getPassword()));
         Usuario usuario = mapper.map(usuarioDTO, Usuario.class);
+        usuario.setFechaNacimiento(fechaNacimiento);
         Usuario nuevoUsuario = usuarioRepository.save(usuario);
         return convertToDto(nuevoUsuario);
     }
@@ -74,11 +78,13 @@ public class UsuarioService implements IUsuarioSevice {
             ValidarApellido.validarApellido(usuarioDTO.getApellido());
             ValidarRol.validarRolExistente(usuarioDTO.getRol());
             ValidarFecha.validarFecha(usuarioDTO.getFechaNacimiento());
+            LocalDate fechaNacimiento = LocalDate.parse(usuarioDTO.getFechaNacimiento());
             Usuario usuario = optUsuario.get();
             Usuario usuarioActualizado = mapper.map(usuarioDTO, Usuario.class);
             usuarioActualizado.setEmail(usuario.getEmail());
             usuarioActualizado.setPassword(usuario.getPassword());
             usuarioActualizado.setId(idUsuario);
+            usuarioActualizado.setFechaNacimiento(fechaNacimiento);
             Usuario nuevoUsuario = usuarioRepository.save(usuarioActualizado);
             return convertToDto(nuevoUsuario);
         } else {

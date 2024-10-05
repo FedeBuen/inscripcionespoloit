@@ -28,6 +28,5 @@ public class Proyecto {
     private String url;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    @Temporal(TemporalType.DATE)
     private LocalDate fechaCreacion;
 }

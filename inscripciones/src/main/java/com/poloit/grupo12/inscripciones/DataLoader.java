@@ -103,7 +103,7 @@ public class DataLoader implements CommandLineRunner {
             proyecto.setNombre("TechPioneers");
             proyecto.setDescripcion("Plataforma que enseña desarrollo web moderno, desde HTML/CSS hasta frameworks avanzados como React y Node.js.");
             proyecto.setUrl("https://www.gstatic.com/mobilesdk/240501_mobilesdk/firebase_28dp.png");
-            LocalDate fecha = FechaUtils.convertirStringALocalDate("2024-8-12");
+            LocalDate fecha = FechaUtils.convertirStringALocalDate("2024-08-12");
             proyecto.setFechaCreacion(fecha);
             proyectoRepository.save(proyecto);
         }
@@ -125,7 +125,12 @@ public class DataLoader implements CommandLineRunner {
         }
         List<CursoEstudiante> inscriptos = cursoEstudianteRepository.findAll();
         if(inscriptos.isEmpty()) {
-            CursoEstudianteDTO cursoEstudianteDTO = new CursoEstudianteDTO("1", "3");
+            CursoEstudianteDTO cursoEstudianteDTO = new CursoEstudianteDTO(
+                    "1",
+                    "3",
+                    "inscripto",
+                    0.0,
+                    "2024-10-04");
             cursoEstudianteService.save(cursoEstudianteDTO);
         }
     }

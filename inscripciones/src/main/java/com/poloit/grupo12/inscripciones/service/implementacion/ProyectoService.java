@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 @Service
@@ -43,7 +44,9 @@ public class ProyectoService implements IProyectoService {
         ModelMapper mapper = new ModelMapper();
         ValidarNombre.validarNombre(proyectoDTO.getNombre());
         ValidarFecha.validarFecha(proyectoDTO.getFechaCreacion());
+        LocalDate fechaProyecto = LocalDate.parse(proyectoDTO.getFechaCreacion());
         Proyecto proyecto = mapper.map(proyectoDTO, Proyecto.class);
+        proyecto.setFechaCreacion(fechaProyecto);
         Proyecto nuevoProyecto = proyectoRepository.save(proyecto);
         return convertToDto(nuevoProyecto);
     }
@@ -55,9 +58,11 @@ public class ProyectoService implements IProyectoService {
         Optional<Proyecto> optProyecto = proyectoRepository.findById(idProyecto);
         if (optProyecto.isPresent()) {
             ValidarFecha.validarFecha(proyectoDTO.getFechaCreacion());
+            LocalDate fechaProyecto = LocalDate.parse(proyectoDTO.getFechaCreacion());
             ValidarNombre.validarNombre(proyectoDTO.getNombre());
             Proyecto proyecto = mapper.map(proyectoDTO, Proyecto.class);
             proyecto.setId(idProyecto);
+            proyecto.setFechaCreacion(fechaProyecto);
             Proyecto proyectoEditado = proyectoRepository.save(proyecto);
             return convertToDto(proyectoEditado);
         } else {
