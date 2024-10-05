@@ -10,10 +10,12 @@ import com.poloit.grupo12.inscripciones.service.interfaces.ICursoEstudianteServi
 import com.poloit.grupo12.inscripciones.service.interfaces.ICursoService;
 import com.poloit.grupo12.inscripciones.service.interfaces.IOngService;
 import com.poloit.grupo12.inscripciones.service.interfaces.IUsuarioSevice;
+import com.poloit.grupo12.inscripciones.utils.FechaUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
-import java.util.Date;
+
+import java.time.LocalDate;
 import java.util.List;
 
 @Component
@@ -101,7 +103,8 @@ public class DataLoader implements CommandLineRunner {
             proyecto.setNombre("TechPioneers");
             proyecto.setDescripcion("Plataforma que enseña desarrollo web moderno, desde HTML/CSS hasta frameworks avanzados como React y Node.js.");
             proyecto.setUrl("https://www.gstatic.com/mobilesdk/240501_mobilesdk/firebase_28dp.png");
-            proyecto.setFechaCreacion(new Date());
+            LocalDate fecha = FechaUtils.convertirStringALocalDate("2024-8-12");
+            proyecto.setFechaCreacion(fecha);
             proyectoRepository.save(proyecto);
         }
         List<Curso> listaCursos = cursoRepository.findAll();

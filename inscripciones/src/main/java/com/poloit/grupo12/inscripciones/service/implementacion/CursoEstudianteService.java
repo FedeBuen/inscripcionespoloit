@@ -1,9 +1,9 @@
 package com.poloit.grupo12.inscripciones.service.implementacion;
 
 import com.poloit.grupo12.inscripciones.dto.CursoEstudianteDTO;
-import com.poloit.grupo12.inscripciones.dto.CursoEstudianteIdDTO;
 import com.poloit.grupo12.inscripciones.enums.Estado;
 import com.poloit.grupo12.inscripciones.enums.Rol;
+import com.poloit.grupo12.inscripciones.exception.RecursoExistenteException;
 import com.poloit.grupo12.inscripciones.exception.RecursoNoEncontradoException;
 import com.poloit.grupo12.inscripciones.exception.RolNoAutorizadoException;
 import com.poloit.grupo12.inscripciones.model.CursoEstudiante;
@@ -14,14 +14,17 @@ import com.poloit.grupo12.inscripciones.repository.ICursoEstudianteRepository;
 import com.poloit.grupo12.inscripciones.repository.ICursoRepository;
 import com.poloit.grupo12.inscripciones.repository.IUsuarioRepository;
 import com.poloit.grupo12.inscripciones.service.interfaces.ICursoEstudianteService;
+import com.poloit.grupo12.inscripciones.utils.FechaUtils;
 import com.poloit.grupo12.inscripciones.validaciones.ValidarEstado;
+import com.poloit.grupo12.inscripciones.validaciones.ValidarFecha;
 import com.poloit.grupo12.inscripciones.validaciones.ValidarIdFormat;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import java.util.Date;
+
+import java.time.LocalDate;
 import java.util.EnumSet;
 import java.util.Optional;
 
@@ -44,32 +47,40 @@ public class CursoEstudianteService implements ICursoEstudianteService {
     }
 
     @Override
-    public CursoEstudianteDTO findById(CursoEstudianteIdDTO id) {
-        CursoEstudiante cursoEstudiante = getCursoEstudiante(id);
+    public CursoEstudianteDTO findById(String idCurso, String idEstudiante) {
+        CursoEstudiante cursoEstudiante = getCursoEstudianteExistente(idCurso, idEstudiante);
+        if (cursoEstudiante == null)
+            throw new RecursoNoEncontradoException("El estudiante no se encuentra inscripto en este curso");
         return convertToDto(cursoEstudiante);
     }
 
     @Override
     public CursoEstudianteDTO save(CursoEstudianteDTO cursoEstudianteDTO) {
-        CursoEstudiante cursoEstudiante = getCursoEstudiante(cursoEstudianteDTO);
-        cursoEstudianteRepository.save(cursoEstudiante);
-        return convertToDto(cursoEstudiante);
+        CursoEstudiante cursoEstudiante = getCursoEstudianteExistente(cursoEstudianteDTO.getIdCurso(),
+                cursoEstudianteDTO.getIdEstudiante());
+        if (cursoEstudiante != null)
+            throw new RecursoExistenteException("El estudiante ya se encuentra inscripto en este curso");
+        CursoEstudiante cursoEstudianteNuevo = getCursoEstudiante(cursoEstudianteDTO);
+        cursoEstudianteRepository.save(cursoEstudianteNuevo);
+        return convertToDto(cursoEstudianteNuevo);
     }
 
     @Override
     public CursoEstudianteDTO update(CursoEstudianteDTO cursoEstudianteDTO) {
-        CursoEstudianteIdDTO id = new CursoEstudianteIdDTO(cursoEstudianteDTO.getIdCurso(), cursoEstudianteDTO.getIdEstudiante());
-        CursoEstudiante cursoEstudiante = getCursoEstudiante(id);
-        Estado estado = ValidarEstado.validarEstadoExistente(String.valueOf(cursoEstudiante.getEstado()));
-
+        CursoEstudiante cursoEstudiante = getCursoEstudianteExistente(cursoEstudianteDTO.getIdCurso(),
+                cursoEstudianteDTO.getIdEstudiante());
+        if (cursoEstudiante == null)
+            throw new RecursoNoEncontradoException("El estudiante no se encuentra inscripto en este curso");
         CursoEstudiante cursoEstudianteActualizado = getCursoEstudiante(cursoEstudianteDTO);
         cursoEstudianteRepository.save(cursoEstudianteActualizado);
         return convertToDto(cursoEstudianteActualizado);
     }
 
     @Override
-    public void delete(CursoEstudianteIdDTO id) {
-        CursoEstudiante cursoEstudiante = getCursoEstudiante(id);
+    public void delete(String idCurso, String idEstudiante) {
+        CursoEstudiante cursoEstudiante = getCursoEstudianteExistente(idCurso, idEstudiante);
+        if (cursoEstudiante == null)
+            throw new RecursoNoEncontradoException("El estudiante no se encuentra inscripto en este curso");
         cursoEstudianteRepository.delete(cursoEstudiante);
     }
 
@@ -88,7 +99,7 @@ public class CursoEstudianteService implements ICursoEstudianteService {
     private CursoEstudiante getCursoEstudiante(CursoEstudianteDTO cursoEstudianteDTO) {
         Long idCursoL = ValidarIdFormat.convertirIdALong(cursoEstudianteDTO.getIdCurso());
         Long idEstudianteL = ValidarIdFormat.convertirIdALong(cursoEstudianteDTO.getIdEstudiante());
-        Optional<Usuario> optEstudiante = estudianteRepository.findById(idEstudianteL);
+                Optional<Usuario> optEstudiante = estudianteRepository.findById(idEstudianteL);
         Optional<Curso> optCurso = cursoRepository.findById(idCursoL);
         Curso curso = optCurso.orElseThrow(() ->
                 new RecursoNoEncontradoException("No se encontró el curso con Id: " +
@@ -100,18 +111,19 @@ public class CursoEstudianteService implements ICursoEstudianteService {
         if (!rolesPermitidos.contains(estudiante.getRol())) {
             throw new RolNoAutorizadoException("Para inscribirse a un curso el usuario debe ser VISITANTE o ESTUDIANTE");
         }
+        Estado estado = ValidarEstado.validarEstadoExistente(cursoEstudianteDTO.getEstado());
+        double calificacion = cursoEstudianteDTO.getCalificacion().doubleValue();
         CursoEstudianteId id = new CursoEstudianteId(idCursoL, idEstudianteL);
-        return new CursoEstudiante(id, estudiante, curso, Estado.INSCRIPTO, 0.0, new Date());
+        LocalDate fecha = FechaUtils.convertirStringALocalDate(cursoEstudianteDTO.getFechaInscripcion());
+        ValidarFecha.validarFecha(String.valueOf(cursoEstudianteDTO.getFechaInscripcion()));
+        return new CursoEstudiante(id, estudiante, curso, estado, calificacion, fecha);
     }
 
-    private CursoEstudiante getCursoEstudiante(CursoEstudianteIdDTO id) {
-        Long idCurso = ValidarIdFormat.convertirIdALong(id.getIdCurso());
-        Long idEstudiante = ValidarIdFormat.convertirIdALong(id.getIdEstudiante());
-        CursoEstudianteId idCursoEstudiante = new CursoEstudianteId(idCurso, idEstudiante);
-        CursoEstudiante cursoEstudiante = cursoEstudianteRepository.findById(idCursoEstudiante)
-                .orElseThrow(() -> new RecursoNoEncontradoException(
-                        "No se encontró el CursoEstudiante con idCurso: "
-                                + idCurso + " y idEstudiante: " + idEstudiante));
+    private CursoEstudiante getCursoEstudianteExistente(String idCurso, String idEstudiante) {
+        Long idCursoL = ValidarIdFormat.convertirIdALong(idCurso);
+        Long idEstudianteL = ValidarIdFormat.convertirIdALong(idEstudiante);
+        CursoEstudianteId idCursoEstudiante = new CursoEstudianteId(idCursoL, idEstudianteL);
+        CursoEstudiante cursoEstudiante = cursoEstudianteRepository.findById(idCursoEstudiante).orElse(null);
         return cursoEstudiante;
     }
 }

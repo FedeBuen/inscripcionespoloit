@@ -107,4 +107,21 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
     }
 
+    @ExceptionHandler(EstadoNoValidoException.class)
+    public ResponseEntity<ErrorResponse> handleEstadoNoValidoException(
+            EstadoNoValidoException ex,
+            HttpServletRequest request) {
+        String url = request.getRequestURI();
+        ErrorResponse error = new ErrorResponse(ex.getMessage(), url);
+        return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(RecursoExistenteException.class)
+    public ResponseEntity<ErrorResponse> handleRecursoExistenteException(
+            RecursoExistenteException ex,
+            HttpServletRequest request) {
+        String url = request.getRequestURI();
+        ErrorResponse error = new ErrorResponse(ex.getMessage(), url);
+        return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
+    }
 }

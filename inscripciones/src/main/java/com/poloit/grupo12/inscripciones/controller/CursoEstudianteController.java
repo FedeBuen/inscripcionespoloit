@@ -1,7 +1,6 @@
 package com.poloit.grupo12.inscripciones.controller;
 
 import com.poloit.grupo12.inscripciones.dto.CursoEstudianteDTO;
-import com.poloit.grupo12.inscripciones.dto.CursoEstudianteIdDTO;
 import com.poloit.grupo12.inscripciones.service.implementacion.CursoEstudianteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -25,26 +24,25 @@ public class CursoEstudianteController {
         Page<CursoEstudianteDTO> lista = service.findAll(pageable);
         return ResponseEntity.ok(lista);
     }
-    @GetMapping("/obtener")
-    public ResponseEntity<?> findById(@RequestBody CursoEstudianteIdDTO cursoEstudianteIdDTO) {
-        CursoEstudianteDTO cursoEstudianteDTO = service.findById(cursoEstudianteIdDTO);
+    @GetMapping("/obtener/{idCurso}/{idEstudiante}")
+    public ResponseEntity<?> findById(@PathVariable String idCurso,
+                                      @PathVariable String idEstudiante) {
+        CursoEstudianteDTO cursoEstudianteDTO = service.findById(idCurso, idEstudiante);
         return ResponseEntity.ok(cursoEstudianteDTO);
     }
 
-    @DeleteMapping("/borrar")
-    public ResponseEntity<?> delete(@RequestBody CursoEstudianteIdDTO cursoEstudianteIdDTO) {
-        CursoEstudianteDTO cursoEstudianteDTO = service.findById(cursoEstudianteIdDTO);
-        service.delete(cursoEstudianteIdDTO);
+    @DeleteMapping("/borrar/{idCurso}/{idEstudiante}")
+    public ResponseEntity<?> delete(@PathVariable String idCurso,
+                                    @PathVariable String idEstudiante) {
+        CursoEstudianteDTO cursoEstudianteDTO = service.findById(idCurso, idEstudiante);
+        service.delete(idCurso, idEstudiante);
         return ResponseEntity.ok("Se eliminó la inscripcion del curso " +
                 cursoEstudianteDTO.getTituloCurso() +
                 " al estudiante " + cursoEstudianteDTO.getNombreEstudiante());
     }
-
-    /* terminar - ver service *****
     @PutMapping("/editar")
     public ResponseEntity<?> update(@RequestBody CursoEstudianteDTO cursoEstudianteDTO) {
         CursoEstudianteDTO cursoEstudianteDTOActualizado = service.update(cursoEstudianteDTO);
         return ResponseEntity.ok(cursoEstudianteDTOActualizado);
     }
-     */
 }

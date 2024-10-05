@@ -4,7 +4,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
 import com.poloit.grupo12.inscripciones.enums.Rol;
-import java.util.Date;
+import java.time.LocalDate;
+
 
 @Getter
 @Setter
@@ -23,7 +24,7 @@ public class Usuario {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @Temporal(TemporalType.DATE)
-    private Date fechaNacimiento;
+    private LocalDate fechaNacimiento;
 
     @Enumerated(EnumType.STRING)
     private Rol rol;
@@ -31,7 +32,7 @@ public class Usuario {
     @Column(nullable = false)
     private String password;
 
-    public Usuario(String nombre, String apellido, String email, Date fechaNacimiento, Rol rol, String password) {
+    public Usuario(String nombre, String apellido, String email, LocalDate fechaNacimiento, Rol rol, String password) {
         this.nombre = nombre;
         this.apellido = apellido;
         this.email = email;

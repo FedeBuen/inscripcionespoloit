@@ -9,9 +9,9 @@ import org.springframework.data.domain.Pageable;
 public interface ICursoEstudianteService {
 
     public Page<CursoEstudianteDTO> findAll(Pageable pageable);
-    public CursoEstudianteDTO findById(CursoEstudianteIdDTO id);
+    public CursoEstudianteDTO findById(String idCurso, String idEstudiante);
     public CursoEstudianteDTO save(CursoEstudianteDTO cursoEstudianteDTO);
     public CursoEstudianteDTO update(CursoEstudianteDTO cursoEstudianteDTO);
-    public void delete(CursoEstudianteIdDTO id);
+    public void delete(String idCurso, String idEstudiante);
 
 }
