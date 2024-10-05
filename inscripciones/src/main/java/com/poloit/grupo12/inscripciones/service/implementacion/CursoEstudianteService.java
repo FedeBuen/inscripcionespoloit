@@ -113,6 +113,7 @@ public class CursoEstudianteService implements ICursoEstudianteService {
         }
         Estado estado = ValidarEstado.validarEstadoExistente(cursoEstudianteDTO.getEstado());
         double calificacion = cursoEstudianteDTO.getCalificacion().doubleValue();
+        // validar nota
         CursoEstudianteId id = new CursoEstudianteId(idCursoL, idEstudianteL);
         LocalDate fecha = FechaUtils.convertirStringALocalDate(cursoEstudianteDTO.getFechaInscripcion());
         ValidarFecha.validarFecha(String.valueOf(cursoEstudianteDTO.getFechaInscripcion()));
