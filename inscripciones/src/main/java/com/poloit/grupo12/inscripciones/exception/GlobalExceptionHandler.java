@@ -124,4 +124,21 @@ public class GlobalExceptionHandler {
         ErrorResponse error = new ErrorResponse(ex.getMessage(), url);
         return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
     }
+
+    @ExceptionHandler(TokenNoValidoException.class)
+    public ResponseEntity<ErrorResponse> handleTokenNoValidoException(
+            TokenNoValidoException ex,
+            HttpServletRequest request) {
+        String url = request.getRequestURI();
+        ErrorResponse error = new ErrorResponse(ex.getMessage(), url);
+        return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
+    }
+    @ExceptionHandler(TokenExistenteException.class)
+    public ResponseEntity<ErrorResponse> handleTokenExistenteException(
+            TokenExistenteException ex,
+            HttpServletRequest request) {
+        String url = request.getRequestURI();
+        ErrorResponse error = new ErrorResponse(ex.getMessage(), url);
+        return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
+    }
 }

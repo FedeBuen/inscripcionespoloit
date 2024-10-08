@@ -61,6 +61,9 @@ public class CursoEstudianteService implements ICursoEstudianteService {
         if (cursoEstudiante != null)
             throw new RecursoExistenteException("El estudiante ya se encuentra inscripto en este curso");
         CursoEstudiante cursoEstudianteNuevo = getCursoEstudiante(cursoEstudianteDTO);
+        Usuario estudiante = cursoEstudianteNuevo.getEstudiante();
+        estudiante.setRol(Rol.ESTUDIANTE);
+        estudianteRepository.save(estudiante);
         cursoEstudianteRepository.save(cursoEstudianteNuevo);
         return convertToDto(cursoEstudianteNuevo);
     }

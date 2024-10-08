@@ -1,7 +1,6 @@
 package com.poloit.grupo12.inscripciones.service.interfaces;
 
 import com.poloit.grupo12.inscripciones.dto.UsuarioDTO;
-import com.poloit.grupo12.inscripciones.enums.Rol;
 import com.poloit.grupo12.inscripciones.model.Usuario;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,5 +18,7 @@ public interface IUsuarioSevice {
 
     public UsuarioDTO updateEmail(String id, UsuarioDTO usuarioDTO);
     public UsuarioDTO updatePassword(String id, UsuarioDTO usuarioDTO);
+
+    public void restablecerPassword(Usuario usuario, String nuevoPassword);
 
 }

@@ -148,6 +148,14 @@ public class UsuarioService implements IUsuarioSevice {
         }
     }
 
+    @Override
+    public void restablecerPassword(Usuario usuario, String nuevoPassword) {
+        ValidarPassword.validarPassword(nuevoPassword);
+        String encryptedPassword = encryptService.encryptPassword(nuevoPassword);
+        usuario.setPassword(encryptedPassword);
+        usuarioRepository.save(usuario);
+    }
+
     private UsuarioDTO convertToDto(Usuario usuario) {
         ModelMapper mapper = new ModelMapper();
         UsuarioDTO usuarioDTO = mapper.map(usuario, UsuarioDTO.class);

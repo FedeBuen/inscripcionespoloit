@@ -43,7 +43,7 @@ public class UsuarioController {
     @PostMapping("/crear")
     public ResponseEntity<?> create(@RequestBody UsuarioDTO usuarioDTO) {
             UsuarioDTO nuevoUsuario = service.save(usuarioDTO);
-            emailService.sendEmailUsuario(usuarioDTO);
+            emailService.enviarEmailUsuario(usuarioDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body(nuevoUsuario);
     }
 

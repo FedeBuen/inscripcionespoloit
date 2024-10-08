@@ -13,7 +13,7 @@ public class EmailService implements IEmailService {
     @Autowired
     private JavaMailSender javaMailSender;
 
-    public void sendEmail(String to, String subject, String body) {
+    public void enviarEmail(String to, String subject, String body) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(to);
         message.setSubject(subject);
@@ -22,8 +22,19 @@ public class EmailService implements IEmailService {
         javaMailSender.send(message);
     }
 
+
     @Override
-    public void sendEmailUsuario(UsuarioDTO usuarioDTO) {
+    public void enviarEmailRecuperacion(String to, String token) {
+        String subject = "Recuperación de contraseña - Punto & Aprende";
+        String body = "Este es un correo automático para reestablcer la contraseña\n "
+                + "Copie el siguiente código de verificación para recuperar la contraseña\n"
+                + token + "\n" + "\n" + "La validez del codigo de verificación es una hora.\n"
+                + "Saludos de Punto & Aprende";
+        enviarEmail(to, subject, body);
+    }
+
+    @Override
+    public void enviarEmailUsuario(UsuarioDTO usuarioDTO) {
         String to = usuarioDTO.getEmail();
         String subject = "Bienvenido a Punto & Aprende";
         String body = "Hola " + usuarioDTO.getNombre()
@@ -32,6 +43,6 @@ public class EmailService implements IEmailService {
                 + "Descubre nuestas ofertas de cursos y disfruta "
                 + "aprender las nuevas tecnologías que te brindaran "
                 + "herramientas para entrar al futuro de IT.";
-        sendEmail(to, subject, body);
+        enviarEmail(to, subject, body);
     }
 }
