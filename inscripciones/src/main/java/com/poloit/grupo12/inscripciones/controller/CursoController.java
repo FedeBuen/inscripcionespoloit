@@ -43,8 +43,8 @@ public class CursoController {
 
     @PutMapping("/editar/{id}")
     public ResponseEntity<?> update(@RequestBody CursoDTO cursoDTO,
-                                    @PathVariable String idCurso) {
-        CursoDTO cursoEditado = service.update(idCurso, cursoDTO);
+                                    @PathVariable String id) {
+        CursoDTO cursoEditado = service.update(id, cursoDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(cursoEditado);
 
     }
