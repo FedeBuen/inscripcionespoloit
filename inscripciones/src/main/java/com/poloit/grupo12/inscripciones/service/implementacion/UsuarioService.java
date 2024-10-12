@@ -41,6 +41,14 @@ public class UsuarioService implements IUsuarioSevice {
     }
 
     @Override
+    public Page<UsuarioDTO> findByNombreLike(String nombre, Pageable pageable) {
+        Page<Usuario> usuarios = usuarioRepository.findByNombreLike("%" + nombre + "%", pageable);
+        if(usuarios.isEmpty())
+            throw new RecursoNoEncontradoException("No se encontraron usuarios que coincidan con el nombre: " + nombre);
+        return usuarios.map(this::convertToDto);
+    }
+
+    @Override
     public UsuarioDTO findById(String id) {
         Long idUsuario = ValidarIdFormat.convertirIdALong(id);
         Optional<Usuario> optUsuario = usuarioRepository.findById(idUsuario);

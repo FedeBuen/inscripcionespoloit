@@ -8,6 +8,8 @@ public interface IUsuarioSevice {
     public Page<UsuarioDTO> findAll(Pageable pageable);
     public Page<UsuarioDTO> findByRol(String rol, Pageable pageable);
 
+    public Page<UsuarioDTO> findByNombreLike(String nombre, Pageable pageable);
+
     public UsuarioDTO findById(String id);
     public UsuarioDTO save(UsuarioDTO usuarioDTO);
     public UsuarioDTO update(String id, UsuarioDTO usuarioDTO);

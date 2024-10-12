@@ -34,6 +34,11 @@ public class UsuarioController {
         Page<UsuarioDTO> lista = service.findByRol(rol, pageable);
         return ResponseEntity.ok(lista);
     }
+    @GetMapping("/buscar/{nombre}")
+    public ResponseEntity<?> findByNombreLike(@PathVariable String nombre, Pageable pageable) {
+        Page<UsuarioDTO> lista = service.findByNombreLike(nombre, pageable);
+        return ResponseEntity.ok(lista);
+    }
 
     @GetMapping("/obtener/{id}")
     public ResponseEntity<?> findById(@PathVariable String id) {

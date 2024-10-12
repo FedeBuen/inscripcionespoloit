@@ -18,7 +18,7 @@ public class CursoEstudianteDTO {
     private String estado;
     private Double calificacion;
     private String fechaInscripcion;
-
+    private String email;
     public CursoEstudianteDTO(String idCurso, String idEstudiante) {
         this.idCurso = idCurso;
         this.idEstudiante = idEstudiante;

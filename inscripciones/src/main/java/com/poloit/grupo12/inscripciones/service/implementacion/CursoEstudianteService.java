@@ -96,6 +96,7 @@ public class CursoEstudianteService implements ICursoEstudianteService {
         cursoEstudianteDTO.setNombreEstudiante(cursoEstudiante.getEstudiante()
                 .getNombre() + " " + cursoEstudiante.getEstudiante()
                 .getApellido());
+        cursoEstudianteDTO.setEmail(cursoEstudiante.getEstudiante().getEmail());
         return cursoEstudianteDTO;
     }
 
