@@ -24,6 +24,12 @@ public class CursoEstudianteController {
         Page<CursoEstudianteDTO> lista = service.findAll(pageable);
         return ResponseEntity.ok(lista);
     }
+    @GetMapping("/listar/estudiantes/{idCurso}")
+    public ResponseEntity<?> findByCursoId(@PathVariable String idCurso, Pageable pageable) {
+        Page<CursoEstudianteDTO> lista = service.findByCursoId(idCurso, pageable);
+        return ResponseEntity.ok(lista);
+    }
+
     @GetMapping("/obtener/{idCurso}/{idEstudiante}")
     public ResponseEntity<?> findById(@PathVariable String idCurso,
                                       @PathVariable String idEstudiante) {
@@ -45,4 +51,6 @@ public class CursoEstudianteController {
         CursoEstudianteDTO cursoEstudianteDTOActualizado = service.update(cursoEstudianteDTO);
         return ResponseEntity.ok(cursoEstudianteDTOActualizado);
     }
+
+
 }

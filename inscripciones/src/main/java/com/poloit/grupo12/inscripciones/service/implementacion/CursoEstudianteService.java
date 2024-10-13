@@ -87,6 +87,15 @@ public class CursoEstudianteService implements ICursoEstudianteService {
         cursoEstudianteRepository.delete(cursoEstudiante);
     }
 
+    @Override
+    public Page<CursoEstudianteDTO> findByCursoId(String idCurso, Pageable pageable) {
+        Long idCursoL = ValidarIdFormat.convertirIdALong(idCurso);
+        Page<CursoEstudiante> listaEstudiantes = cursoEstudianteRepository.findByCursoId(idCursoL, pageable);
+        if(listaEstudiantes.isEmpty())
+            throw new RecursoNoEncontradoException("No se encotraron estudiantes inscriptos al curso con Id: " + idCurso);
+        return listaEstudiantes.map(this::convertToDto);
+    }
+
     private CursoEstudianteDTO convertToDto(CursoEstudiante cursoEstudiante) {
         ModelMapper mapper = new ModelMapper();
         CursoEstudianteDTO cursoEstudianteDTO = mapper.map(cursoEstudiante, CursoEstudianteDTO.class);

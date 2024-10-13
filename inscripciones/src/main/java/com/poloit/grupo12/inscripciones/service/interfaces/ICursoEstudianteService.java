@@ -13,5 +13,6 @@ public interface ICursoEstudianteService {
     public CursoEstudianteDTO save(CursoEstudianteDTO cursoEstudianteDTO);
     public CursoEstudianteDTO update(CursoEstudianteDTO cursoEstudianteDTO);
     public void delete(String idCurso, String idEstudiante);
+    public Page<CursoEstudianteDTO> findByCursoId(String idCurso, Pageable pageable);
 
 }
