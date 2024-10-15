@@ -1,6 +1,7 @@
 package com.poloit.grupo12.inscripciones.controller;
 
 import com.poloit.grupo12.inscripciones.dto.CursoDTO;
+import com.poloit.grupo12.inscripciones.dto.UsuarioDTO;
 import com.poloit.grupo12.inscripciones.service.implementacion.CursoService;
 import com.poloit.grupo12.inscripciones.validaciones.ValidarIdFormat;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,11 @@ public class CursoController {
             String mensajeError = "Ocurrió un error al crear el curso: " + e.getMessage();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mensajeError);
         }
+    }
+    @GetMapping("/buscar/{titulo}")
+    public ResponseEntity<?> findByTituloLike(@PathVariable String titulo, Pageable pageable) {
+        Page<CursoDTO> lista = service.findByTituloLike(titulo, pageable);
+        return ResponseEntity.ok(lista);
     }
 
     @PutMapping("/editar/{id}")

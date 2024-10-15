@@ -2,6 +2,7 @@ package com.poloit.grupo12.inscripciones.service.implementacion;
 
 import com.poloit.grupo12.inscripciones.dto.UsuarioDTO;
 import com.poloit.grupo12.inscripciones.enums.Rol;
+import com.poloit.grupo12.inscripciones.exception.ClaveForaneaException;
 import com.poloit.grupo12.inscripciones.exception.EmailRepetidoException;
 import com.poloit.grupo12.inscripciones.exception.RecursoNoEncontradoException;
 import com.poloit.grupo12.inscripciones.model.Usuario;
@@ -11,6 +12,7 @@ import com.poloit.grupo12.inscripciones.service.interfaces.IUsuarioSevice;
 import com.poloit.grupo12.inscripciones.validaciones.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -104,10 +106,12 @@ public class UsuarioService implements IUsuarioSevice {
     public void delete(String id) {
         Long idUsuario = ValidarIdFormat.convertirIdALong(id);
         Optional<Usuario> usuario = usuarioRepository.findById(idUsuario);
-        if (usuario.isPresent()) {
-            usuarioRepository.deleteById(idUsuario);
-        } else {
+        if (usuario.isEmpty())
             throw new RecursoNoEncontradoException("No se encontro usuario con id: :" + id);
+        try {
+            usuarioRepository.deleteById(idUsuario);
+        } catch (DataIntegrityViolationException e) {
+            throw new ClaveForaneaException("No se puede borrar el usuario porque esta inscripto a un curso");
         }
     }
 

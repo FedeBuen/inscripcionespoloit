@@ -1,5 +1,6 @@
 package com.poloit.grupo12.inscripciones.controller;
 
+import com.poloit.grupo12.inscripciones.dto.CursoDTO;
 import com.poloit.grupo12.inscripciones.dto.ProyectoDTO;
 import com.poloit.grupo12.inscripciones.service.interfaces.IProyectoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,5 +46,11 @@ public class ProyectoController {
             service.delete(id);
             String mensajeOk = "Se eliminó el proyecto con el ID " + id;
             return ResponseEntity.ok(mensajeOk);
+    }
+
+    @GetMapping("/buscar/{nombre}")
+    public ResponseEntity<?> findByTituloLike(@PathVariable String nombre, Pageable pageable) {
+        Page<ProyectoDTO> lista = service.findByNombreLike(nombre, pageable);
+        return ResponseEntity.ok(lista);
     }
 }

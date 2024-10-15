@@ -141,4 +141,13 @@ public class GlobalExceptionHandler {
         ErrorResponse error = new ErrorResponse(ex.getMessage(), url);
         return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
     }
+
+    @ExceptionHandler(ClaveForaneaException.class)
+    public ResponseEntity<ErrorResponse> handleClaveForaneaException(
+            ClaveForaneaException ex,
+            HttpServletRequest request) {
+        String url = request.getRequestURI();
+        ErrorResponse error = new ErrorResponse(ex.getMessage(), url);
+        return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
+    }
 }

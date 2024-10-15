@@ -9,4 +9,5 @@ public interface ICursoService {
     public CursoDTO save(CursoDTO cursoDTO);
     public CursoDTO update(String id, CursoDTO cursoDTO);
     public void delete(String id);
+    public Page<CursoDTO> findByTituloLike(String titulo, Pageable pageable);
 }

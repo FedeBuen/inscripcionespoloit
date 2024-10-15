@@ -2,6 +2,7 @@ package com.poloit.grupo12.inscripciones.service.implementacion;
 
 import com.poloit.grupo12.inscripciones.dto.CursoDTO;
 import com.poloit.grupo12.inscripciones.enums.Rol;
+import com.poloit.grupo12.inscripciones.exception.ClaveForaneaException;
 import com.poloit.grupo12.inscripciones.exception.RecursoNoEncontradoException;
 import com.poloit.grupo12.inscripciones.model.Curso;
 import com.poloit.grupo12.inscripciones.model.Ong;
@@ -14,6 +15,7 @@ import com.poloit.grupo12.inscripciones.validaciones.ValidarIdFormat;
 import com.poloit.grupo12.inscripciones.validaciones.ValidarRol;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -93,11 +95,21 @@ public class CursoService implements ICursoService {
     public void delete(String idCurso) {
         Long id = ValidarIdFormat.convertirIdALong(idCurso);
         Optional<Curso> curso = cursoRepository.findById(id);
-        if (curso.isPresent()) {
-            cursoRepository.deleteById(id);
-        } else {
+        if (curso.isEmpty())
             throw new RecursoNoEncontradoException("No se encontro Curso con id: :" + id);
+        try {
+            cursoRepository.deleteById(id);
+        } catch (DataIntegrityViolationException e) {
+            throw new ClaveForaneaException("No se puede borrar el curso porque tiene alumnos inscriptos");
         }
+    }
+
+    @Override
+    public Page<CursoDTO> findByTituloLike(String titulo, Pageable pageable) {
+        Page<Curso> cursos = cursoRepository.findByTituloLike("%" + titulo + "%", pageable);
+        if (cursos.isEmpty())
+            throw new RecursoNoEncontradoException("No se encontraron cursos con el titulo: " + titulo);
+        return cursos.map(this::convertToDto);
     }
 
     private CursoDTO convertToDto(Curso curso) {

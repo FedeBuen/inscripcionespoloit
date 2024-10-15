@@ -74,11 +74,18 @@ public class ProyectoService implements IProyectoService {
     public void delete(String id) {
         Long idProyecto = ValidarIdFormat.convertirIdALong(id);
         Optional<Proyecto> optProyecto = proyectoRepository.findById(idProyecto);
-        if (optProyecto.isPresent()) {
-            proyectoRepository.deleteById(idProyecto);
-        } else {
+        if (optProyecto.isEmpty())
             throw new RecursoNoEncontradoException("No se encontro el proyecto con Id: " + id);
-        }
+        proyectoRepository.deleteById(idProyecto);
+
+    }
+
+    @Override
+    public Page<ProyectoDTO> findByNombreLike(String nombre, Pageable pageable) {
+        Page<Proyecto> proyectos = proyectoRepository.findByNombreLike("%" + nombre + "%", pageable);
+        if(proyectos.isEmpty())
+            throw new RecursoNoEncontradoException("No se encontraron proyectos que coincidan con el nombre: " + nombre);
+        return proyectos.map(this::convertToDto);
     }
 
     private ProyectoDTO convertToDto(Proyecto proyecto) {

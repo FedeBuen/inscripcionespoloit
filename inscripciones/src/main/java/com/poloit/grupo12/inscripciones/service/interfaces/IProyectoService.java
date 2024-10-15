@@ -10,4 +10,6 @@ public interface IProyectoService {
     ProyectoDTO save(ProyectoDTO proyectoDTO);
     ProyectoDTO update(String id, ProyectoDTO proyectoDTO);
     void delete(String id);
+    Page<ProyectoDTO> findByNombreLike(String nombre, Pageable pageable);
+
 }
