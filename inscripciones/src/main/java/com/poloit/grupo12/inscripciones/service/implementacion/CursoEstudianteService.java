@@ -1,6 +1,8 @@
 package com.poloit.grupo12.inscripciones.service.implementacion;
 
 import com.poloit.grupo12.inscripciones.dto.CursoEstudianteDTO;
+import com.poloit.grupo12.inscripciones.dto.EstudianteDTO;
+import com.poloit.grupo12.inscripciones.dto.UsuarioDTO;
 import com.poloit.grupo12.inscripciones.enums.Estado;
 import com.poloit.grupo12.inscripciones.enums.Rol;
 import com.poloit.grupo12.inscripciones.exception.RecursoExistenteException;
@@ -13,17 +15,22 @@ import com.poloit.grupo12.inscripciones.model.Usuario;
 import com.poloit.grupo12.inscripciones.repository.ICursoEstudianteRepository;
 import com.poloit.grupo12.inscripciones.repository.ICursoRepository;
 import com.poloit.grupo12.inscripciones.repository.IUsuarioRepository;
+import com.poloit.grupo12.inscripciones.service.interfaces.ICertificadoService;
 import com.poloit.grupo12.inscripciones.service.interfaces.ICursoEstudianteService;
+import com.poloit.grupo12.inscripciones.service.interfaces.IEmailService;
 import com.poloit.grupo12.inscripciones.utils.FechaUtils;
 import com.poloit.grupo12.inscripciones.validaciones.ValidarEstado;
 import com.poloit.grupo12.inscripciones.validaciones.ValidarFecha;
 import com.poloit.grupo12.inscripciones.validaciones.ValidarIdFormat;
+import jakarta.mail.MessagingException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.EnumSet;
 import java.util.Optional;
@@ -37,6 +44,11 @@ public class CursoEstudianteService implements ICursoEstudianteService {
     private ICursoRepository cursoRepository;
     @Autowired
     private ICursoEstudianteRepository cursoEstudianteRepository;
+    @Autowired
+    private ICertificadoService certificadoService;
+
+    @Autowired
+    private IEmailService emailService;
 
     @Override
     public Page<CursoEstudianteDTO> findAll(Pageable pageable) {
@@ -69,12 +81,23 @@ public class CursoEstudianteService implements ICursoEstudianteService {
     }
 
     @Override
-    public CursoEstudianteDTO update(CursoEstudianteDTO cursoEstudianteDTO) {
+    public CursoEstudianteDTO update(CursoEstudianteDTO cursoEstudianteDTO) throws MessagingException, IOException {
+        ModelMapper mapper = new ModelMapper();
         CursoEstudiante cursoEstudiante = getCursoEstudianteExistente(cursoEstudianteDTO.getIdCurso(),
                 cursoEstudianteDTO.getIdEstudiante());
         if (cursoEstudiante == null)
             throw new RecursoNoEncontradoException("El estudiante no se encuentra inscripto en este curso");
         CursoEstudiante cursoEstudianteActualizado = getCursoEstudiante(cursoEstudianteDTO);
+        if (cursoEstudianteActualizado.getEstado().equals(Estado.APROBADO)) {
+            ByteArrayInputStream certificado = certificadoService.generarCertificado(cursoEstudianteDTO);
+            try {
+                emailService.enviarEmailCertificado(cursoEstudianteDTO, certificado);
+            } catch (MessagingException e) {
+                throw new RuntimeException(e);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
         cursoEstudianteRepository.save(cursoEstudianteActualizado);
         return convertToDto(cursoEstudianteActualizado);
     }

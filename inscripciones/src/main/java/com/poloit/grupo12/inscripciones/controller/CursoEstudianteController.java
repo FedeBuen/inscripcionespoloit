@@ -2,12 +2,15 @@ package com.poloit.grupo12.inscripciones.controller;
 
 import com.poloit.grupo12.inscripciones.dto.CursoEstudianteDTO;
 import com.poloit.grupo12.inscripciones.service.implementacion.CursoEstudianteService;
+import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/inscripcion/curso")
@@ -47,8 +50,15 @@ public class CursoEstudianteController {
                 " al estudiante " + cursoEstudianteDTO.getNombreEstudiante());
     }
     @PutMapping("/editar")
-    public ResponseEntity<?> update(@RequestBody CursoEstudianteDTO cursoEstudianteDTO) {
-        CursoEstudianteDTO cursoEstudianteDTOActualizado = service.update(cursoEstudianteDTO);
+    public ResponseEntity<?> update(@RequestBody CursoEstudianteDTO cursoEstudianteDTO) throws MessagingException, IOException {
+        CursoEstudianteDTO cursoEstudianteDTOActualizado = null;
+        try {
+            cursoEstudianteDTOActualizado = service.update(cursoEstudianteDTO);
+        } catch (MessagingException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         return ResponseEntity.ok(cursoEstudianteDTOActualizado);
     }
 
