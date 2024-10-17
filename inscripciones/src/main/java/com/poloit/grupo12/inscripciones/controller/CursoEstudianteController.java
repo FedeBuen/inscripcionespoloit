@@ -61,6 +61,4 @@ public class CursoEstudianteController {
         }
         return ResponseEntity.ok(cursoEstudianteDTOActualizado);
     }
-
-
 }

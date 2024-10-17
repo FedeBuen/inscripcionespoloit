@@ -87,6 +87,11 @@ public class CursoEstudianteService implements ICursoEstudianteService {
                 cursoEstudianteDTO.getIdEstudiante());
         if (cursoEstudiante == null)
             throw new RecursoNoEncontradoException("El estudiante no se encuentra inscripto en este curso");
+        cursoEstudianteDTO.setEmail(cursoEstudiante.getEstudiante().getEmail());
+        cursoEstudianteDTO.setNombreEstudiante(cursoEstudiante.getEstudiante().getNombre() +
+                " " + cursoEstudiante.getEstudiante().getApellido());
+        cursoEstudianteDTO.setTituloCurso(cursoEstudiante.getCurso().getTitulo());
+        cursoEstudianteDTO.setFechaInscripcion(cursoEstudiante.getFechaInscripcion().toString());
         CursoEstudiante cursoEstudianteActualizado = getCursoEstudiante(cursoEstudianteDTO);
         if (cursoEstudianteActualizado.getEstado().equals(Estado.APROBADO)) {
             ByteArrayInputStream certificado = certificadoService.generarCertificado(cursoEstudianteDTO);
